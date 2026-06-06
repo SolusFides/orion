@@ -1,41 +1,11 @@
 @using SmartDisplay.ControlPanelClient.Models.Templates
 
-<div class="preview-frame theme-@Template.Config.Theme">
-    <div class="preview-device">
-        <div class="preview-topbar">
-            <span>@Template.Name</span>
-            <small>@Template.Config.Layout / 9:16</small>
-        </div>
-
-        <div class="preview-content layout-@Template.Config.Layout">
-            @foreach (var widget in Template.Config.Widgets)
-            {
-                <WidgetPreviewCard WidgetType="@widget" Title="@GetWidgetTitle(widget)" Description="@GetWidgetDescription(widget)" />
-            }
-        </div>
-    </div>
-</div>
+<DisplayFrame Size="@Size">
+    <TemplateRenderer Template="Template" ShowHeader="ShowHeader" />
+</DisplayFrame>
 
 @code {
     [Parameter, EditorRequired] public TemplateDto Template { get; set; } = new();
-
-    private static string GetWidgetTitle(string type) => type switch
-    {
-        "news" => "Новости УК",
-        "parking" => "Свободные парковки",
-        "storage" => "Кладовые",
-        "weather" => "Погода",
-        "rss" => "RSS-лента",
-        _ => "Статический блок"
-    };
-
-    private static string GetWidgetDescription(string type) => type switch
-    {
-        "news" => "Объявления и новости из ЛК Ujin.",
-        "parking" => "Количество свободных машиномест по зонам.",
-        "storage" => "Количество свободных кладовых помещений.",
-        "weather" => "Погода и температура возле ЖК.",
-        "rss" => "Внешняя новостная лента района или города.",
-        _ => "Постоянная информация, правила ЖК или контакты."
-    };
+    [Parameter] public bool ShowHeader { get; set; } = true;
+    [Parameter] public string Size { get; set; } = "default";
 }

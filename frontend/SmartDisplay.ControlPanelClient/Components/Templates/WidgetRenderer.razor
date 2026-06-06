@@ -1,0 +1,101 @@
+@using SmartDisplay.ControlPanelClient.Models.Templates
+
+<article class="display-widget @TypeClass @SizeClass">
+    <header class="display-widget__header">
+        <span class="display-widget__icon">@Icon</span>
+        <div>
+            <h3>@Widget.DisplayTitle</h3>
+            <small>@WidgetTypes.GetDisplayName(Widget.Type)</small>
+        </div>
+    </header>
+
+    <div class="display-widget__body">
+        @switch (Widget.Type)
+        {
+            case WidgetTypes.News:
+                <div class="widget-news">
+                    <strong>Заявки через приложение</strong>
+                    <span>Передавайте показания, оставляйте обращения и следите за новостями дома.</span>
+                    <em>Сегодня</em>
+                </div>
+                <div class="widget-news">
+                    <strong>Плановые работы</strong>
+                    <span>Обслуживание инженерных систем пройдёт по утверждённому графику.</span>
+                    <em>12 июня</em>
+                </div>
+                break;
+
+            case WidgetTypes.Parking:
+                <div class="widget-metric">
+                    <strong>12</strong>
+                    <span>свободных мест</span>
+                </div>
+                <div class="widget-line"><span>Наземный паркинг</span><b>4</b></div>
+                <div class="widget-line"><span>Подземный паркинг</span><b>8</b></div>
+                break;
+
+            case WidgetTypes.Storage:
+                <div class="widget-metric">
+                    <strong>9</strong>
+                    <span>свободных кладовых</span>
+                </div>
+                <p>Доступные помещения можно уточнить у администратора УК.</p>
+                break;
+
+            case WidgetTypes.Weather:
+                <div class="widget-weather">
+                    <strong>+21°</strong>
+                    <span>Пермь, переменная облачность</span>
+                </div>
+                break;
+
+            case WidgetTypes.Rss:
+                <div class="widget-news">
+                    <strong>Новости района</strong>
+                    <span>События, транспортные изменения и городские объявления.</span>
+                    <em>Лента</em>
+                </div>
+                break;
+
+            case WidgetTypes.Camera:
+                <div class="widget-camera">
+                    <div></div>
+                    <span>Общедомовая камера</span>
+                </div>
+                break;
+
+            default:
+                <p>@StaticText</p>
+                break;
+        }
+    </div>
+</article>
+
+@code {
+    [Parameter, EditorRequired] public TemplateWidgetDto Widget { get; set; } = new();
+
+    private string TypeClass => $"display-widget--{Widget.Type.Replace('_', '-') }";
+    private string SizeClass => Widget.Size switch
+    {
+        WidgetSizes.Small => "display-widget--small",
+        WidgetSizes.Wide => "display-widget--wide",
+        WidgetSizes.Tall => "display-widget--tall",
+        WidgetSizes.Large => "display-widget--large",
+        _ => "display-widget--normal"
+    };
+
+    private string Icon => Widget.Type switch
+    {
+        WidgetTypes.News => "N",
+        WidgetTypes.Parking => "P",
+        WidgetTypes.Storage => "S",
+        WidgetTypes.Weather => "°",
+        WidgetTypes.Rss => "R",
+        WidgetTypes.Camera => "C",
+        _ => "i"
+    };
+
+    private string StaticText => Widget.Settings.TryGetValue("text", out var text) && !string.IsNullOrWhiteSpace(text)
+        ? text
+        : "Правила ЖК, контакты аварийной службы и постоянная информация для жителей.";
+}

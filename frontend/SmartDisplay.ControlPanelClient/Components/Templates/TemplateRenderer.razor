@@ -1,0 +1,55 @@
+@using SmartDisplay.ControlPanelClient.Models.Templates
+
+<section class="template-renderer @ThemeClass @LayoutClass">
+    @if (ShowHeader)
+    {
+        <header class="template-renderer__header">
+            <div>
+                <div class="template-renderer__eyebrow">Информационный дисплей</div>
+                <h2>@Template.Name</h2>
+            </div>
+
+            <div class="template-renderer__meta">
+                <span>@TemplateLayouts.GetDisplayName(Template.Config.Layout)</span>
+                <span>@TemplateThemes.GetDisplayName(Template.Config.Theme)</span>
+            </div>
+        </header>
+    }
+
+    @if (Widgets.Count == 0)
+    {
+        <div class="template-renderer__empty">
+            <strong>Нет виджетов</strong>
+            <span>Добавьте информационные блоки в редакторе шаблона.</span>
+        </div>
+    }
+    else
+    {
+        <div class="template-renderer__content">
+            @foreach (var widget in Widgets)
+            {
+                <WidgetRenderer Widget="widget" />
+            }
+        </div>
+    }
+</section>
+
+@code {
+    [Parameter, EditorRequired] public TemplateDto Template { get; set; } = new();
+    [Parameter] public bool ShowHeader { get; set; } = true;
+
+    private List<TemplateWidgetDto> Widgets => Template.Config.GetEffectiveWidgets();
+
+    private string ThemeClass => Template.Config.Theme == TemplateThemes.Dark
+        ? "template-renderer--dark"
+        : "template-renderer--light";
+
+    private string LayoutClass => Template.Config.Layout switch
+    {
+        TemplateLayouts.Split => "template-renderer--split",
+        TemplateLayouts.Columns3 => "template-renderer--columns-3",
+        TemplateLayouts.Columns4 => "template-renderer--columns-4",
+        TemplateLayouts.Columns6 => "template-renderer--columns-6",
+        _ => "template-renderer--grid"
+    };
+}
