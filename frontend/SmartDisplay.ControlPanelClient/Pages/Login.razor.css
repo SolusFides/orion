@@ -1,0 +1,127 @@
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: radial-gradient(circle at top left, rgba(37, 99, 235, 0.18), transparent 34%),
+                linear-gradient(135deg, #f8fafc 0%, #eef2ff 48%, #e0f2fe 100%);
+}
+
+.login-card {
+    width: min(440px, 100%);
+    padding: 32px;
+    border-radius: 24px;
+    background: #ffffff;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.14);
+}
+
+.login-brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.login-logo {
+    width: 56px;
+    height: 56px;
+    display: grid;
+    place-items: center;
+    border-radius: 18px;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 800;
+    box-shadow: 0 14px 34px rgba(37, 99, 235, 0.32);
+}
+
+.login-brand h1 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 24px;
+    line-height: 1.2;
+}
+
+.login-brand p {
+    margin: 6px 0 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.login-form {
+    display: grid;
+    gap: 16px;
+}
+
+.form-field {
+    display: grid;
+    gap: 8px;
+}
+
+.form-field label {
+    color: #334155;
+    font-size: 14px;
+    font-weight: 650;
+}
+
+.form-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 14px;
+    color: #0f172a;
+    background: #ffffff;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.form-input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.13);
+}
+
+.login-error {
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+    background: #fef2f2;
+    font-size: 14px;
+}
+
+.login-button {
+    width: 100%;
+    padding: 14px 18px;
+    border: 0;
+    border-radius: 14px;
+    color: #ffffff;
+    background: #2563eb;
+    font-size: 15px;
+    font-weight: 750;
+    cursor: pointer;
+    box-shadow: 0 14px 32px rgba(37, 99, 235, 0.28);
+    transition: transform 0.14s ease, background 0.14s ease, box-shadow 0.14s ease;
+}
+
+.login-button:hover:not(:disabled) {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+.login-button:disabled {
+    cursor: not-allowed;
+    background: #94a3b8;
+    box-shadow: none;
+}
+
+.login-demo {
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid #e2e8f0;
+    color: #64748b;
+    text-align: center;
+    font-size: 13px;
+}

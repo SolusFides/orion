@@ -1,0 +1,75 @@
+@page "/dashboard"
+
+@using SmartDisplay.ControlPanelClient.Models.Dashboard
+@using SmartDisplay.ControlPanelClient.Services.Auth
+@using SmartDisplay.ControlPanelClient.Services.Dashboard
+
+@inject AuthState AuthState
+@inject IDashboardService DashboardService
+@inject NavigationManager Navigation
+
+<PageTitle>Главная | Умный дисплей ЖК</PageTitle>
+
+@if (!AuthState.IsAuthenticated)
+{
+    <div class="auth-required">
+        <h1>Нужен вход</h1>
+        <p>Для работы с панелью управления сначала авторизуйтесь.</p>
+        <button type="button" @onclick="GoToLogin">Перейти ко входу</button>
+    </div>
+}
+else if (summary is null)
+{
+    <div class="dashboard-loading">Загрузка сводки...</div>
+}
+else
+{
+    <AppPageHeader
+        Kicker="Главная"
+        Title="Панель управления УК"
+        Subtitle="Сводка по подключенным экранам, шаблонам и режиму чрезвычайных ситуаций.">
+        <button type="button" class="primary-action" @onclick="CreateTemplate">Создать шаблон</button>
+    </AppPageHeader>
+
+    <section class="stats-grid">
+        <DashboardStatCard Label="Всего экранов" Value="@summary.ScreensTotal.ToString()" Hint="Подключенные панели в холлах, лифтах и на ресепшн." Icon="▣" Variant="blue" />
+        <DashboardStatCard Label="С шаблоном" Value="@summary.ScreensWithTemplate.ToString()" Hint="Экраны, на которые уже назначен шаблон." Icon="✓" Variant="green" />
+        <DashboardStatCard Label="Шаблоны" Value="@summary.TemplatesTotal.ToString()" Hint="Сохраненные варианты сетки и виджетов." Icon="▦" Variant="violet" />
+        <DashboardStatCard Label="Активные ЧС" Value="@summary.ActiveEmergenciesTotal.ToString()" Hint="Сообщения, которые сейчас отображаются поверх контента." Icon="!" Variant="red" />
+    </section>
+
+    <section class="dashboard-sections">
+        <div>
+            <h2>Быстрые действия</h2>
+            <div class="quick-grid">
+                @foreach (var action in quickActions)
+                {
+                    <DashboardQuickActionCard Title="@action.Title" Description="@action.Description" Url="@action.Url" />
+                }
+            </div>
+        </div>
+
+        <DashboardRecentEventList Events="recentEvents" />
+    </section>
+}
+
+@code {
+    private DashboardSummaryDto? summary;
+    private List<DashboardQuickActionDto> quickActions = new();
+    private List<DashboardRecentEventDto> recentEvents = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.IsAuthenticated)
+        {
+            return;
+        }
+
+        summary = await DashboardService.GetSummaryAsync();
+        quickActions = await DashboardService.GetQuickActionsAsync();
+        recentEvents = await DashboardService.GetRecentEventsAsync();
+    }
+
+    private void GoToLogin() => Navigation.NavigateTo("/login");
+    private void CreateTemplate() => Navigation.NavigateTo("/templates/create");
+}

@@ -1,0 +1,48 @@
+@page "/templates/{TemplateId}/preview"
+
+@using SmartDisplay.ControlPanelClient.Models.Templates
+@using SmartDisplay.ControlPanelClient.Services.Auth
+@using SmartDisplay.ControlPanelClient.Services.Templates
+
+@inject AuthState AuthState
+@inject ITemplatesService TemplatesService
+@inject NavigationManager Navigation
+
+<PageTitle>Предпросмотр шаблона | Умный дисплей ЖК</PageTitle>
+
+@if (!AuthState.IsAuthenticated)
+{
+    <EmptyState Icon="!" Title="Нужен вход" Text="Авторизуйтесь, чтобы открывать предпросмотр шаблонов." />
+}
+else if (template is null)
+{
+    <EmptyState Icon="▦" Title="Шаблон не найден" Text="Проверьте идентификатор шаблона или вернитесь к списку." />
+}
+else
+{
+    <AppPageHeader
+        Kicker="Предпросмотр"
+        Title="Предпросмотр 9:16"
+        Subtitle="Визуальная проверка шаблона в пропорциях клиентского дисплея. Интерактив отключён.">
+        <button type="button" class="page-button" @onclick="Back">Назад</button>
+    </AppPageHeader>
+
+    <TemplatePreviewFrame Template="template" />
+}
+
+@code {
+    [Parameter] public string TemplateId { get; set; } = string.Empty;
+    private TemplateDto? template;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.IsAuthenticated)
+        {
+            return;
+        }
+
+        template = await TemplatesService.GetTemplateByIdAsync(TemplateId);
+    }
+
+    private void Back() => Navigation.NavigateTo("/templates");
+}

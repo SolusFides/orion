@@ -1,0 +1,72 @@
+.page-button,
+.assign-controls button {
+    padding: 12px 16px;
+    border: 0;
+    border-radius: 14px;
+    color: #ffffff;
+    background: #2563eb;
+    font-weight: 850;
+    cursor: pointer;
+}
+
+.assign-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 22px;
+    margin-bottom: 20px;
+    border-radius: 24px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
+}
+
+.assign-panel h2 {
+    margin: 0 0 6px;
+    color: #0f172a;
+    font-size: 20px;
+}
+
+.assign-panel p {
+    margin: 0;
+    color: #64748b;
+}
+
+.assign-controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.assign-controls select {
+    min-width: 180px;
+    padding: 12px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 14px;
+    background: #ffffff;
+    color: #0f172a;
+}
+
+.screens-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+@media (max-width: 1100px) {
+    .screens-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .assign-panel {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 680px) {
+    .screens-grid {
+        grid-template-columns: 1fr;
+    }
+}

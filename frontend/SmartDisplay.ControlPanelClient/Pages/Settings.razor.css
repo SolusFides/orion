@@ -1,0 +1,62 @@
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.settings-card {
+    padding: 24px;
+    border-radius: 24px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
+}
+
+.settings-card h2 {
+    margin: 0 0 16px;
+    color: #0f172a;
+    font-size: 20px;
+}
+
+.settings-card p {
+    color: #64748b;
+}
+
+.settings-card code {
+    display: inline-flex;
+    padding: 8px 10px;
+    border-radius: 10px;
+    color: #1e3a8a;
+    background: #dbeafe;
+}
+
+dl {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+}
+
+dl div {
+    padding: 12px;
+    border-radius: 14px;
+    background: #f8fafc;
+}
+
+dt {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 850;
+    text-transform: uppercase;
+}
+
+dd {
+    margin: 5px 0 0;
+    color: #0f172a;
+    font-weight: 850;
+}
+
+@media (max-width: 800px) {
+    .settings-grid {
+        grid-template-columns: 1fr;
+    }
+}

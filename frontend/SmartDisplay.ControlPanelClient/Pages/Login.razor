@@ -1,0 +1,116 @@
+@page "/login"
+
+@using SmartDisplay.ControlPanelClient.Models.Auth
+@using SmartDisplay.ControlPanelClient.Services.Auth
+
+@inject IAuthService AuthService
+@inject AuthState AuthState
+@inject NavigationManager Navigation
+
+<PageTitle>Вход | Умный дисплей ЖК</PageTitle>
+
+<div class="login-page">
+    <section class="login-card">
+        <div class="login-brand">
+            <div class="login-logo">ЖК</div>
+            <div>
+                <h1>Умный дисплей ЖК</h1>
+                <p>Панель управления УК</p>
+            </div>
+        </div>
+
+        <div class="login-form">
+            <div class="form-field">
+                <label for="username">Логин</label>
+                <input id="username"
+                       class="form-input"
+                       autocomplete="username"
+                       placeholder="admin"
+                       @bind="loginModel.Username"
+                       @bind:event="oninput" />
+            </div>
+
+            <div class="form-field">
+                <label for="password">Пароль</label>
+                <input id="password"
+                       class="form-input"
+                       type="password"
+                       autocomplete="current-password"
+                       placeholder="secret"
+                       @bind="loginModel.Password"
+                       @bind:event="oninput"
+                       @onkeydown="HandlePasswordKeyDown" />
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(errorMessage))
+            {
+                <div class="login-error">@errorMessage</div>
+            }
+
+            <button class="login-button" type="button" disabled="@isLoading" @onclick="LoginAsync">
+                @(isLoading ? "Входим..." : "Войти")
+            </button>
+        </div>
+
+        <div class="login-demo">
+            Тестовые данные: <b>admin</b> / <b>secret</b>
+        </div>
+    </section>
+</div>
+
+@code {
+    private readonly LoginRequest loginModel = new();
+    private bool isLoading;
+    private string errorMessage = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        if (AuthState.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/dashboard");
+        }
+    }
+
+    private async Task LoginAsync()
+    {
+        if (isLoading)
+        {
+            return;
+        }
+
+        errorMessage = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(loginModel.Username) || string.IsNullOrWhiteSpace(loginModel.Password))
+        {
+            errorMessage = "Введите логин и пароль.";
+            return;
+        }
+
+        isLoading = true;
+
+        try
+        {
+            var response = await AuthService.LoginAsync(loginModel);
+
+            if (!response.HasAccessToken)
+            {
+                errorMessage = "Неверный логин или пароль.";
+                return;
+            }
+
+            Navigation.NavigateTo("/dashboard");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task HandlePasswordKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            await LoginAsync();
+        }
+    }
+}

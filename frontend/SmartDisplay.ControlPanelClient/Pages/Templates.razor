@@ -1,0 +1,55 @@
+@page "/templates"
+
+@using SmartDisplay.ControlPanelClient.Models.Templates
+@using SmartDisplay.ControlPanelClient.Services.Auth
+@using SmartDisplay.ControlPanelClient.Services.Templates
+
+@inject AuthState AuthState
+@inject ITemplatesService TemplatesService
+@inject NavigationManager Navigation
+
+<PageTitle>Шаблоны | Умный дисплей ЖК</PageTitle>
+
+@if (!AuthState.IsAuthenticated)
+{
+    <EmptyState Icon="!" Title="Нужен вход" Text="Авторизуйтесь, чтобы создавать и назначать шаблоны." />
+}
+else
+{
+    <AppPageHeader
+        Kicker="Шаблоны"
+        Title="Шаблоны дисплеев"
+        Subtitle="Управление сетками, темами и наборами виджетов для дисплеев.">
+        <button type="button" class="page-button" @onclick="CreateTemplate">Создать шаблон</button>
+    </AppPageHeader>
+
+    @if (templates.Count == 0)
+    {
+        <EmptyState Icon="▦" Title="Список шаблонов пуст" Text="Создайте первый шаблон с новостями, парковками или постоянной информацией." />
+    }
+    else
+    {
+        <section class="templates-grid">
+            @foreach (var template in templates)
+            {
+                <TemplateCard Template="template" />
+            }
+        </section>
+    }
+}
+
+@code {
+    private List<TemplateDto> templates = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.IsAuthenticated)
+        {
+            return;
+        }
+
+        templates = await TemplatesService.GetTemplatesAsync();
+    }
+
+    private void CreateTemplate() => Navigation.NavigateTo("/templates/create");
+}

@@ -1,0 +1,174 @@
+@page "/templates/create"
+@page "/templates/{TemplateId}/edit"
+
+@using SmartDisplay.ControlPanelClient.Models.Templates
+@using SmartDisplay.ControlPanelClient.Services.Auth
+@using SmartDisplay.ControlPanelClient.Services.Templates
+
+@inject AuthState AuthState
+@inject ITemplatesService TemplatesService
+@inject NavigationManager Navigation
+
+<PageTitle>Редактор шаблона | Умный дисплей ЖК</PageTitle>
+
+@if (!AuthState.IsAuthenticated)
+{
+    <EmptyState Icon="!" Title="Нужен вход" Text="Авторизуйтесь, чтобы редактировать шаблоны." />
+}
+else
+{
+    <AppPageHeader
+        Kicker="Редактор"
+        Title="@PageTitleText"
+        Subtitle="Настройте структуру, тему и набор виджетов для отображения на дисплеях." />
+
+    <div class="editor-grid">
+        <section class="editor-form">
+            <div class="field">
+                <label>Название шаблона</label>
+                <input @bind="templateName" @bind:event="oninput" placeholder="Например: Утренняя сетка" />
+            </div>
+
+            <div class="field-row">
+                <div class="field">
+                    <label>Layout</label>
+                    <select @bind="layout">
+                        <option value="grid">grid</option>
+                        <option value="split">split</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Тема</label>
+                    <select @bind="theme">
+                        <option value="light">light</option>
+                        <option value="dark">dark</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="widgets-picker">
+                <h2>Виджеты</h2>
+                @foreach (var item in availableWidgets)
+                {
+                    <label class="widget-option">
+                        <input type="checkbox" checked="@selectedWidgets.Contains(item.Type)" @onchange="args => ToggleWidget(item.Type, args)" />
+                        <span>
+                            <strong>@item.Title</strong>
+                            <small>@item.Description</small>
+                        </span>
+                    </label>
+                }
+            </div>
+
+            <div class="editor-actions">
+                <button type="button" @onclick="SaveAsync">Сохранить</button>
+                <button type="button" class="secondary" @onclick="Back">Назад</button>
+            </div>
+        </section>
+
+        <section class="editor-preview">
+            <TemplatePreviewFrame Template="PreviewTemplate" />
+        </section>
+    </div>
+}
+
+@code {
+    [Parameter] public string? TemplateId { get; set; }
+
+    private string templateName = "Новый шаблон";
+    private string layout = "grid";
+    private string theme = "light";
+    private List<string> selectedWidgets = new() { "news", "parking" };
+
+    private string PageTitleText => string.IsNullOrWhiteSpace(TemplateId) ? "Создание шаблона" : "Редактирование шаблона";
+
+    private TemplateDto PreviewTemplate => new()
+    {
+        Id = TemplateId ?? "new-template",
+        Name = templateName,
+        Config = new TemplateConfigDto
+        {
+            Layout = layout,
+            Theme = theme,
+            Widgets = selectedWidgets.ToList()
+        }
+    };
+
+    private readonly List<WidgetOption> availableWidgets = new()
+    {
+        new("news", "Новости УК", "Объявления и новости из ЛК Ujin."),
+        new("parking", "Парковки", "Свободные машиноместа по зонам."),
+        new("storage", "Кладовые", "Свободные кладовые помещения."),
+        new("weather", "Погода", "Внешний виджет погоды."),
+        new("static", "Постоянная информация", "Правила ЖК, контакты аварийной службы, график вывоза мусора."),
+        new("rss", "RSS", "Внешняя лента новостей района или города.")
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.IsAuthenticated || string.IsNullOrWhiteSpace(TemplateId))
+        {
+            return;
+        }
+
+        var template = await TemplatesService.GetTemplateByIdAsync(TemplateId);
+        if (template is null)
+        {
+            return;
+        }
+
+        templateName = template.Name;
+        layout = template.Config.Layout;
+        theme = template.Config.Theme;
+        selectedWidgets = template.Config.Widgets.ToList();
+    }
+
+    private void ToggleWidget(string type, ChangeEventArgs args)
+    {
+        var isChecked = args.Value is bool value && value;
+
+        if (isChecked && !selectedWidgets.Contains(type))
+        {
+            selectedWidgets.Add(type);
+        }
+
+        if (!isChecked)
+        {
+            selectedWidgets.Remove(type);
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        var config = new TemplateConfigDto
+        {
+            Layout = layout,
+            Theme = theme,
+            Widgets = selectedWidgets.ToList()
+        };
+
+        if (string.IsNullOrWhiteSpace(TemplateId))
+        {
+            await TemplatesService.CreateTemplateAsync(new CreateTemplateRequest
+            {
+                Name = templateName,
+                Config = config
+            });
+        }
+        else
+        {
+            await TemplatesService.UpdateTemplateAsync(TemplateId, new UpdateTemplateRequest
+            {
+                Name = templateName,
+                Config = config
+            });
+        }
+
+        Navigation.NavigateTo("/templates");
+    }
+
+    private void Back() => Navigation.NavigateTo("/templates");
+
+    private sealed record WidgetOption(string Type, string Title, string Description);
+}

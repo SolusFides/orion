@@ -1,0 +1,117 @@
+@page "/screens"
+
+@using SmartDisplay.ControlPanelClient.Models.Screens
+@using SmartDisplay.ControlPanelClient.Models.Templates
+@using SmartDisplay.ControlPanelClient.Services.Auth
+@using SmartDisplay.ControlPanelClient.Services.Screens
+@using SmartDisplay.ControlPanelClient.Services.Templates
+
+@inject AuthState AuthState
+@inject IScreensService ScreensService
+@inject ITemplatesService TemplatesService
+@inject NavigationManager Navigation
+
+<PageTitle>Экраны | Умный дисплей ЖК</PageTitle>
+
+@if (!AuthState.IsAuthenticated)
+{
+    <EmptyState Icon="!" Title="Нужен вход" Text="Авторизуйтесь, чтобы управлять экранами." />
+}
+else
+{
+    <AppPageHeader
+        Kicker="Экраны"
+        Title="Управление экранами"
+        Subtitle="Список подключенных экранов и назначение шаблонов на один экран, группу или все панели.">
+        <button type="button" class="page-button" @onclick="AddScreenAsync">Добавить экран</button>
+    </AppPageHeader>
+
+    <section class="assign-panel">
+        <div>
+            <h2>Назначить шаблон</h2>
+            <p>Выберите шаблон и область назначения.</p>
+        </div>
+
+        <div class="assign-controls">
+            <select @bind="selectedTemplateId">
+                <option value="">Выберите шаблон</option>
+                @foreach (var template in templates)
+                {
+                    <option value="@template.Id">@template.Name</option>
+                }
+            </select>
+
+            <select @bind="selectedScreenId">
+                <option value="all">Все экраны</option>
+                @foreach (var screen in screens)
+                {
+                    <option value="@screen.Id">@screen.Name</option>
+                }
+            </select>
+
+            <button type="button" @onclick="AssignTemplateAsync">Назначить</button>
+        </div>
+    </section>
+
+    <section class="screens-grid">
+        @foreach (var screen in screens)
+        {
+            <ScreenCard Screen="screen" />
+        }
+    </section>
+}
+
+@code {
+    private List<ScreenDto> screens = new();
+    private List<TemplateDto> templates = new();
+    private string selectedTemplateId = string.Empty;
+    private string selectedScreenId = "all";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.IsAuthenticated)
+        {
+            return;
+        }
+
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        screens = await ScreensService.GetScreensAsync();
+        templates = await TemplatesService.GetTemplatesAsync();
+        selectedTemplateId = templates.FirstOrDefault()?.Id ?? string.Empty;
+    }
+
+    private async Task AssignTemplateAsync()
+    {
+        if (string.IsNullOrWhiteSpace(selectedTemplateId))
+        {
+            return;
+        }
+
+        await ScreensService.AssignTemplateAsync(new AssignScreensRequest
+        {
+            ScreenIds = new List<string> { selectedScreenId },
+            TemplateId = selectedTemplateId
+        });
+
+        await LoadAsync();
+    }
+
+    private async Task AddScreenAsync()
+    {
+        var next = screens.Count + 1;
+        await ScreensService.SaveScreenAsync(new CreateScreenRequest
+        {
+            Id = $"screen_{next:00}",
+            Name = $"Экран {next}",
+            ComplexId = 73,
+            BuildingId = 141,
+            Entrance = next
+        });
+
+        await LoadAsync();
+    }
+}

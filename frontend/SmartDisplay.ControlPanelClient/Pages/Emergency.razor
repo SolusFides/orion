@@ -1,0 +1,139 @@
+@page "/emergency"
+
+@using SmartDisplay.ControlPanelClient.Models.Emergency
+@using SmartDisplay.ControlPanelClient.Models.Screens
+@using SmartDisplay.ControlPanelClient.Services.Auth
+@using SmartDisplay.ControlPanelClient.Services.Emergency
+@using SmartDisplay.ControlPanelClient.Services.Screens
+
+@inject AuthState AuthState
+@inject IEmergencyService EmergencyService
+@inject IScreensService ScreensService
+
+<PageTitle>Режим ЧС | Умный дисплей ЖК</PageTitle>
+
+@if (!AuthState.IsAuthenticated)
+{
+    <EmptyState Icon="!" Title="Нужен вход" Text="Авторизуйтесь, чтобы управлять режимом ЧС." />
+}
+else
+{
+    <AppPageHeader
+        Kicker="ЧС"
+        Title="Режим чрезвычайной ситуации"
+        Subtitle="ЧС накладывается поверх любого шаблона и отправляется адресно: на экран, группу экранов или все дисплеи." />
+
+    <div class="emergency-grid">
+        <section class="emergency-form">
+            <div class="field">
+                <label>Текст сообщения</label>
+                <textarea rows="5" @bind="text" @bind:event="oninput" placeholder="ВНИМАНИЕ!!! Задымление в холле третьего подъезда!"></textarea>
+            </div>
+
+            <div class="field-row">
+                <div class="field">
+                    <label>Цель</label>
+                    <select @bind="selectedScreenId">
+                        <option value="all">Все экраны</option>
+                        @foreach (var screen in screens)
+                        {
+                            <option value="@screen.Id">@screen.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Таймаут, минут</label>
+                    <input type="number" min="1" max="180" @bind="timeoutMinutes" />
+                </div>
+            </div>
+
+            <EmergencyBannerPreview Text="@text" IsDoubleHeight="@(text.Length > 80)" />
+
+            <div class="emergency-actions">
+                <button type="button" class="danger" @onclick="ActivateAsync">Активировать ЧС</button>
+                <button type="button" class="secondary" @onclick="ResetAsync">Сбросить ЧС</button>
+            </div>
+        </section>
+
+        <section class="emergency-side">
+            <div class="panel-card">
+                <h2>Активные ЧС</h2>
+                @if (activeEmergencies.Count == 0)
+                {
+                    <p class="muted">Активных сообщений сейчас нет.</p>
+                }
+                else
+                {
+                    @foreach (var item in activeEmergencies)
+                    {
+                        <article class="emergency-item">
+                            <strong>@item.Text</strong>
+                            <span>@string.Join(", ", item.TargetScreens) · @item.CreatedAt.ToString("dd.MM HH:mm")</span>
+                        </article>
+                    }
+                }
+            </div>
+
+            <div class="panel-card">
+                <h2>Журнал действий</h2>
+                @foreach (var item in log.Take(5))
+                {
+                    <article class="log-item">
+                        <strong>@item.Action</strong>
+                        <span>@item.UserId · @item.CreatedAt.ToString("dd.MM HH:mm")</span>
+                    </article>
+                }
+            </div>
+        </section>
+    </div>
+}
+
+@code {
+    private List<ScreenDto> screens = new();
+    private List<EmergencyActiveDto> activeEmergencies = new();
+    private List<EmergencyLogDto> log = new();
+    private string text = "ВНИМАНИЕ!!! Проверка системы экстренного оповещения.";
+    private string selectedScreenId = "all";
+    private int timeoutMinutes = 30;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.IsAuthenticated)
+        {
+            return;
+        }
+
+        screens = await ScreensService.GetScreensAsync();
+        await LoadEmergencyAsync();
+    }
+
+    private async Task LoadEmergencyAsync()
+    {
+        activeEmergencies = await EmergencyService.GetActiveAsync();
+        log = await EmergencyService.GetLogAsync();
+    }
+
+    private async Task ActivateAsync()
+    {
+        await EmergencyService.ActivateAsync(new EmergencyActivateRequest
+        {
+            Text = text,
+            ScreenIds = new List<string> { selectedScreenId },
+            Priority = 1,
+            TimeoutMinutes = timeoutMinutes
+        });
+
+        await LoadEmergencyAsync();
+    }
+
+    private async Task ResetAsync()
+    {
+        await EmergencyService.ResetAsync(new EmergencyResetRequest
+        {
+            ScreenIds = new List<string> { selectedScreenId }
+        });
+
+        await LoadEmergencyAsync();
+    }
+}
