@@ -1,16 +1,36 @@
-﻿@inherits LayoutComponentBase
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+@inherits LayoutComponentBase
+@inject NavigationManager Navigation
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
+@if (IsAuthPage)
+{
+    <main class="auth-layout">
+        @Body
     </main>
-</div>
+}
+else
+{
+    <div class="admin-layout">
+        <aside class="admin-sidebar">
+            <NavMenu />
+        </aside>
+
+        <section class="admin-workspace">
+            <AdminHeader />
+
+            <main class="admin-content">
+                @Body
+            </main>
+        </section>
+    </div>
+}
+
+@code {
+    private bool IsAuthPage
+    {
+        get
+        {
+            var path = Navigation.ToBaseRelativePath(Navigation.Uri).Trim('/');
+            return path.StartsWith("login", StringComparison.OrdinalIgnoreCase);
+        }
+    }
+}

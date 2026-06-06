@@ -1,39 +1,41 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">SmartDisplay.ControlPanelClient</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+<div class="nav-shell">
+    <div class="nav-brand">
+        <div class="nav-logo">ЖК</div>
+        <div>
+            <div class="nav-title">SmartDisplay</div>
+            <div class="nav-subtitle">Панель УК</div>
+        </div>
+    </div>
+
+    <nav class="nav-list">
+        <NavLink class="nav-link" href="dashboard">
+            <span class="nav-icon">⌂</span>
+            <span>Главная</span>
+        </NavLink>
+
+        <NavLink class="nav-link" href="screens">
+            <span class="nav-icon">▣</span>
+            <span>Экраны</span>
+        </NavLink>
+
+        <NavLink class="nav-link" href="templates">
+            <span class="nav-icon">▦</span>
+            <span>Шаблоны</span>
+        </NavLink>
+
+        <NavLink class="nav-link" href="emergency">
+            <span class="nav-icon nav-icon-danger">!</span>
+            <span>Режим ЧС</span>
+        </NavLink>
+
+        <NavLink class="nav-link" href="settings">
+            <span class="nav-icon">⚙</span>
+            <span>Настройки</span>
+        </NavLink>
+    </nav>
+
+    <div class="nav-footer">
+        <div class="nav-footer-title">Рабочая панель</div>
+        <div class="nav-footer-text">Управление экранами, шаблонами и экстренными сообщениями.</div>
     </div>
 </div>
-
-<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-    </nav>
-</div>
-
-@code {
-    private bool collapseNavMenu = true;
-
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    private void ToggleNavMenu()
-    {
-        collapseNavMenu = !collapseNavMenu;
-    }
-}
