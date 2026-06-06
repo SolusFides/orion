@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     UJIN_BASE_URL: str = "https://hck-api.unicorn.icu"
     
     SECRET_KEY: str
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
+    ACCESS_TOKEN_EXPIRE: int = 86400
     
     ADMIN_USERNAME: str = "admin"
     ADMIN_PASSWORD: str = "admin123"

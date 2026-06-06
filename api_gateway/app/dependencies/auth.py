@@ -1,5 +1,6 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+from datetime import datetime, timedelta
 from jose import JWTError, ExpiredSignatureError, jwt
 from sqlalchemy.future import select
 from app.config import settings
@@ -8,6 +9,17 @@ from app.models.user import User
 from app.dependencies.blacklist import BLACKLIST_TOKENS
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
+
+
+def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(seconds=settings.ACCESS_TOKEN_EXPIRE)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm="HS256")
+    return encoded_jwt
 
 
 async def token_required(token: str = Depends(oauth2_scheme)) -> User:
