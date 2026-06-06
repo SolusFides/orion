@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="SmartDisplay.ControlPanelClient/SmartDisplay.ControlPanelClient.csproj" />
+  <Project Path="SmartDisplay.Shared/SmartDisplay.Shared.csproj" Id="39ec5634-0fae-41db-8cdc-8150c0516af3" />
 </Solution>
