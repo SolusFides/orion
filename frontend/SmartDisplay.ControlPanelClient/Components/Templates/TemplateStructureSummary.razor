@@ -1,0 +1,45 @@
+@using SmartDisplay.Shared.Models.Templates
+
+<section class="template-structure @ThemeClass">
+    <div class="template-structure__head">
+        <div>
+            <span>Шаблон</span>
+            <h2>@Template.Name</h2>
+        </div>
+        <div class="template-structure__meta">
+            <strong>@TemplateLayouts.GetDisplayName(Template.Config.Layout)</strong>
+            <strong>@TemplateThemes.GetDisplayName(Template.Config.Theme)</strong>
+        </div>
+    </div>
+
+    @if (Widgets.Count == 0)
+    {
+        <div class="template-structure__empty">Виджеты не выбраны</div>
+    }
+    else
+    {
+        <div class="template-structure__list">
+            @foreach (var widget in Widgets)
+            {
+                <article class="template-structure__widget">
+                    <div class="template-structure__order">@widget.Order</div>
+                    <div>
+                        <h3>@widget.DisplayTitle</h3>
+                        <p>@WidgetTypes.GetDisplayName(widget.Type)</p>
+                    </div>
+                    <span>@WidgetSizes.GetDisplayName(widget.Size)</span>
+                </article>
+            }
+        </div>
+    }
+</section>
+
+@code {
+    [Parameter, EditorRequired] public TemplateDto Template { get; set; } = new();
+
+    private List<TemplateWidgetDto> Widgets => Template.Config.GetEffectiveWidgets();
+
+    private string ThemeClass => Template.Config.Theme == TemplateThemes.Dark
+        ? "template-structure--dark"
+        : "template-structure--light";
+}

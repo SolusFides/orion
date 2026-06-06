@@ -1,4 +1,4 @@
-using SmartDisplay.ControlPanelClient.Models.Screens;
+using SmartDisplay.Shared.Models.Screens;
 
 namespace SmartDisplay.ControlPanelClient.Services.Screens;
 

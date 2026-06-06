@@ -1,7 +1,7 @@
 @page "/templates/create"
 @page "/templates/{TemplateId}/edit"
 
-@using SmartDisplay.ControlPanelClient.Models.Templates
+@using SmartDisplay.Shared.Models.Templates
 @using SmartDisplay.ControlPanelClient.Services.Auth
 @using SmartDisplay.ControlPanelClient.Services.Templates
 
@@ -72,7 +72,9 @@ else
         </section>
 
         <section class="editor-preview">
-            <TemplatePreviewFrame Template="PreviewTemplate" Size="compact" />
+            <h2>Структура шаблона</h2>
+            <p>Конфигурация, которая сохраняется в API и передаётся клиенту дисплея.</p>
+            <TemplateStructureSummary Template="PreviewTemplate" />
         </section>
     </div>
 }

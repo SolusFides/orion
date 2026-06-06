@@ -1,5 +1,5 @@
-using SmartDisplay.ControlPanelClient.Models.Common;
-using SmartDisplay.ControlPanelClient.Models.Emergency;
+using SmartDisplay.Shared.Models.Common;
+using SmartDisplay.Shared.Models.Emergency;
 
 namespace SmartDisplay.ControlPanelClient.Services.Emergency;
 

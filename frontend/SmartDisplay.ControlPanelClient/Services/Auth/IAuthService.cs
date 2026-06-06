@@ -1,5 +1,5 @@
 using SmartDisplay.ControlPanelClient.Models.Auth;
-using SmartDisplay.ControlPanelClient.Models.Common;
+using SmartDisplay.Shared.Models.Common;
 
 namespace SmartDisplay.ControlPanelClient.Services.Auth;
 

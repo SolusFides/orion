@@ -1,7 +1,7 @@
 using SmartDisplay.ControlPanelClient.Models.Dashboard;
-using SmartDisplay.ControlPanelClient.Models.Emergency;
-using SmartDisplay.ControlPanelClient.Models.Screens;
-using SmartDisplay.ControlPanelClient.Models.Templates;
+using SmartDisplay.Shared.Models.Emergency;
+using SmartDisplay.Shared.Models.Screens;
+using SmartDisplay.Shared.Models.Templates;
 
 namespace SmartDisplay.ControlPanelClient.Services.Common;
 

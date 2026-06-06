@@ -106,3 +106,15 @@
         grid-template-columns: 1fr;
     }
 }
+
+.editor-preview h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 20px;
+}
+
+.editor-preview > p {
+    margin: 6px 0 18px;
+    color: #64748b;
+    line-height: 1.45;
+}

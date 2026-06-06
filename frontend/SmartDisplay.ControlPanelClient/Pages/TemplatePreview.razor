@@ -1,6 +1,6 @@
 @page "/templates/{TemplateId}/preview"
 
-@using SmartDisplay.ControlPanelClient.Models.Templates
+@using SmartDisplay.Shared.Models.Templates
 @using SmartDisplay.ControlPanelClient.Services.Auth
 @using SmartDisplay.ControlPanelClient.Services.Templates
 
@@ -22,12 +22,12 @@ else
 {
     <AppPageHeader
         Kicker="Предпросмотр"
-        Title="Шаблон дисплея 9:16"
-        Subtitle="Визуальная проверка структуры, темы и состава виджетов.">
+        Title="Конфигурация шаблона"
+        Subtitle="Состав виджетов, тема и сетка, которые передаются клиенту дисплея.">
         <button type="button" class="page-button" @onclick="Back">Назад</button>
     </AppPageHeader>
 
-    <TemplatePreviewFrame Template="template" />
+    <TemplateStructureSummary Template="template" />
 }
 
 @code {

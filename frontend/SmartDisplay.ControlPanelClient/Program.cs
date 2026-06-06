@@ -14,11 +14,11 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
 builder.Services.AddScoped<AuthState>();
-builder.Services.AddScoped<IAuthService, MockAuthService>();
+builder.Services.AddScoped<IAuthService, LocalAuthService>();
 
-builder.Services.AddScoped<IScreensService, MockScreensService>();
-builder.Services.AddScoped<ITemplatesService, MockTemplatesService>();
-builder.Services.AddScoped<IEmergencyService, MockEmergencyService>();
-builder.Services.AddScoped<IDashboardService, MockDashboardService>();
+builder.Services.AddScoped<IScreensService, LocalScreensService>();
+builder.Services.AddScoped<ITemplatesService, LocalTemplatesService>();
+builder.Services.AddScoped<IEmergencyService, LocalEmergencyService>();
+builder.Services.AddScoped<IDashboardService, LocalDashboardService>();
 
 await builder.Build().RunAsync();

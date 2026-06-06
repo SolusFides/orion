@@ -1,5 +1,5 @@
-using SmartDisplay.ControlPanelClient.Models.Common;
-using SmartDisplay.ControlPanelClient.Models.Templates;
+using SmartDisplay.Shared.Models.Common;
+using SmartDisplay.Shared.Models.Templates;
 
 namespace SmartDisplay.ControlPanelClient.Services.Templates;
 
