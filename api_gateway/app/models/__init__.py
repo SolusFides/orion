@@ -5,4 +5,4 @@ from app.models.template import Template
 from app.models.emergency import Emergency
 from app.models.emergency_log import EmergencyLog
 
-__all__ = ["Base", "User", "Screen", "Template", "Emergency", "EmergencyLog"]
+
