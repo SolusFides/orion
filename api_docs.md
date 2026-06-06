@@ -4,6 +4,8 @@
 
 ## 1. Авторизация
 
+Все Admin-роуты требуют заголовок: `Authorization: Bearer <access_token>`
+
 ### `POST /api/auth/login`
 * **Request Body**:
   ```json
@@ -11,8 +13,13 @@
   ```
 * **Response (200)**:
   ```json
-  { "status": "success", "user": { "username": "admin", "role": "admin" } }
+  {
+    "access_token": "eyJhbGciOiJIUzI1NiIs...",
+    "token_type": "bearer",
+    "expires_in": 86400
+  }
   ```
+
 
 ### `POST /api/auth/logout`
 * **Response (200)**:
