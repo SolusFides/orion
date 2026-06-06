@@ -10,7 +10,15 @@ public class AuthState
     public string AccessToken => CurrentSession?.AccessToken ?? string.Empty;
     public string AuthorizationHeaderValue => CurrentSession?.AuthorizationHeaderValue ?? string.Empty;
 
+    public string UserName { get; private set; } = string.Empty;
+    public string Role { get; private set; } = string.Empty;
+
     public void StartSession(LoginResponse response)
+    {
+        StartSession(response, "admin", "admin");
+    }
+
+    public void StartSession(LoginResponse response, string userName, string role)
     {
         if (!response.HasAccessToken)
         {
@@ -25,10 +33,15 @@ public class AuthState
             ExpiresIn = response.ExpiresIn,
             LoginAt = DateTime.Now
         };
+
+        UserName = string.IsNullOrWhiteSpace(userName) ? "admin" : userName;
+        Role = string.IsNullOrWhiteSpace(role) ? "admin" : role;
     }
 
     public void Clear()
     {
         CurrentSession = null;
+        UserName = string.Empty;
+        Role = string.Empty;
     }
 }

@@ -31,7 +31,7 @@ public class MockAuthService : IAuthService
             ExpiresIn = 86400
         };
 
-        _authState.StartSession(response);
+        _authState.StartSession(response, request.Username, "admin");
         return response;
     }
 
