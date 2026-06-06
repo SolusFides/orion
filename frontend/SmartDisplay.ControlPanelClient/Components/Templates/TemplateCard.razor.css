@@ -1,0 +1,92 @@
+.template-card {
+    padding: 22px;
+    border-radius: 24px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
+}
+
+.template-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.template-head h3 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 18px;
+    font-weight: 850;
+}
+
+.template-id {
+    margin-top: 6px;
+    color: #64748b;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 13px;
+}
+
+.template-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.template-grid div {
+    padding: 12px;
+    border-radius: 16px;
+    background: #f8fafc;
+}
+
+.template-grid span {
+    display: block;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.template-grid strong {
+    display: block;
+    margin-top: 5px;
+    color: #0f172a;
+    font-size: 18px;
+}
+
+.widget-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.widget-tags span {
+    padding: 7px 10px;
+    border-radius: 999px;
+    color: #1d4ed8;
+    background: #dbeafe;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.template-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.template-actions button {
+    padding: 10px 12px;
+    border: 0;
+    border-radius: 12px;
+    color: #ffffff;
+    background: #2563eb;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.template-actions .secondary {
+    color: #334155;
+    background: #f1f5f9;
+}

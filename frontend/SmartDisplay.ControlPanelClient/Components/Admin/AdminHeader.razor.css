@@ -1,0 +1,95 @@
+.admin-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    min-height: 76px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 14px 28px;
+    background: rgba(255, 255, 255, 0.88);
+    border-bottom: 1px solid #e2e8f0;
+    backdrop-filter: blur(16px);
+}
+
+.admin-header-kicker {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.admin-header-title {
+    margin-top: 3px;
+    color: #0f172a;
+    font-size: 20px;
+    font-weight: 850;
+}
+
+.admin-user-panel {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.admin-user-avatar {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #e0f2fe;
+    color: #0369a1;
+    font-weight: 850;
+}
+
+.admin-user-meta {
+    min-width: 0;
+}
+
+.admin-user-name {
+    color: #0f172a;
+    font-size: 14px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.admin-user-session {
+    margin-top: 2px;
+    color: #64748b;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.admin-logout {
+    padding: 9px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    color: #334155;
+    background: #ffffff;
+    font-weight: 750;
+    cursor: pointer;
+    transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+}
+
+.admin-logout:hover {
+    color: #dc2626;
+    border-color: #fecaca;
+    background: #fef2f2;
+}
+
+@media (max-width: 700px) {
+    .admin-header {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 16px 18px;
+    }
+
+    .admin-user-panel {
+        width: 100%;
+        justify-content: space-between;
+    }
+}

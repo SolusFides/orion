@@ -1,0 +1,38 @@
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.status-badge::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.status-success {
+    color: #047857;
+    background: #d1fae5;
+}
+
+.status-warning {
+    color: #b45309;
+    background: #fef3c7;
+}
+
+.status-danger {
+    color: #b91c1c;
+    background: #fee2e2;
+}
+
+.status-neutral {
+    color: #475569;
+    background: #f1f5f9;
+}

@@ -1,0 +1,49 @@
+@using SmartDisplay.ControlPanelClient.Services.Auth
+@inject AuthState AuthState
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+<header class="admin-header">
+    <div class="admin-header-main">
+        <div class="admin-header-kicker">Панель управления</div>
+        <div class="admin-header-title">Умный дисплей ЖК</div>
+    </div>
+
+    <div class="admin-user-panel">
+        <div class="admin-user-avatar">@UserInitial</div>
+        <div class="admin-user-meta">
+            <div class="admin-user-name">@UserName</div>
+            <div class="admin-user-session">@SessionText</div>
+        </div>
+        <button type="button" class="admin-logout" @onclick="LogoutAsync">Выйти</button>
+    </div>
+</header>
+
+@code {
+    private string UserName => string.IsNullOrWhiteSpace(AuthState.UserName)
+        ? "Администратор УК"
+        : AuthState.UserName;
+
+    private string UserInitial => string.IsNullOrWhiteSpace(UserName)
+        ? "А"
+        : UserName[..1].ToUpperInvariant();
+
+    private string SessionText
+    {
+        get
+        {
+            if (AuthState.CurrentSession is null)
+            {
+                return "Сессия не создана";
+            }
+
+            return $"Сессия до {AuthState.CurrentSession.ExpiresAt:dd.MM HH:mm}";
+        }
+    }
+
+    private async Task LogoutAsync()
+    {
+        await AuthService.LogoutAsync();
+        Navigation.NavigateTo("/login");
+    }
+}

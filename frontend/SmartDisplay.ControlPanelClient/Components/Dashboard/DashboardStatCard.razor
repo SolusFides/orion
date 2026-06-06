@@ -1,0 +1,19 @@
+<div class="stat-card stat-@Variant">
+    <div class="stat-icon">@Icon</div>
+    <div class="stat-content">
+        <div class="stat-label">@Label</div>
+        <div class="stat-value">@Value</div>
+        @if (!string.IsNullOrWhiteSpace(Hint))
+        {
+            <div class="stat-hint">@Hint</div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Label { get; set; } = string.Empty;
+    [Parameter] public string Value { get; set; } = string.Empty;
+    [Parameter] public string Hint { get; set; } = string.Empty;
+    [Parameter] public string Icon { get; set; } = "•";
+    [Parameter] public string Variant { get; set; } = "blue";
+}

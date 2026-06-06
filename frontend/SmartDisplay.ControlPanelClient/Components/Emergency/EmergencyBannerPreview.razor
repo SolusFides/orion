@@ -1,0 +1,12 @@
+<div class="emergency-preview @(IsDoubleHeight ? "double" : "")">
+    <strong>@DisplayText</strong>
+</div>
+
+@code {
+    [Parameter] public string Text { get; set; } = string.Empty;
+    [Parameter] public bool IsDoubleHeight { get; set; }
+
+    private string DisplayText => string.IsNullOrWhiteSpace(Text)
+        ? "ВНИМАНИЕ!!! Сообщение экстренного оповещения."
+        : Text;
+}

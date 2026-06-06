@@ -1,0 +1,30 @@
+@using SmartDisplay.ControlPanelClient.Models.Dashboard
+
+<div class="events-card">
+    <div class="events-title">Последние события</div>
+
+    @if (Events.Count == 0)
+    {
+        <p class="events-empty">Нет событий для отображения.</p>
+    }
+    else
+    {
+        <div class="events-list">
+            @foreach (var item in Events)
+            {
+                <article class="event-item event-@item.Level">
+                    <div class="event-dot"></div>
+                    <div>
+                        <div class="event-title">@item.Title</div>
+                        <div class="event-description">@item.Description</div>
+                        <div class="event-time">@item.CreatedAt.ToString("dd.MM HH:mm")</div>
+                    </div>
+                </article>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public List<DashboardRecentEventDto> Events { get; set; } = new();
+}

@@ -1,0 +1,42 @@
+@using SmartDisplay.ControlPanelClient.Models.Templates
+@inject NavigationManager Navigation
+
+<article class="template-card">
+    <div class="template-head">
+        <div>
+            <h3>@Template.Name</h3>
+            <div class="template-id">@Template.Id</div>
+        </div>
+        <StatusBadge Text="@Template.Config.Theme" Variant="neutral" />
+    </div>
+
+    <div class="template-grid">
+        <div>
+            <span>Сетка</span>
+            <strong>@Template.Config.Layout</strong>
+        </div>
+        <div>
+            <span>Виджеты</span>
+            <strong>@Template.Config.Widgets.Count</strong>
+        </div>
+    </div>
+
+    <div class="widget-tags">
+        @foreach (var widget in Template.Config.Widgets)
+        {
+            <span>@widget</span>
+        }
+    </div>
+
+    <div class="template-actions">
+        <button type="button" @onclick="Edit">Редактировать</button>
+        <button type="button" class="secondary" @onclick="Preview">Предпросмотр</button>
+    </div>
+</article>
+
+@code {
+    [Parameter, EditorRequired] public TemplateDto Template { get; set; } = new();
+
+    private void Edit() => Navigation.NavigateTo($"/templates/{Template.Id}/edit");
+    private void Preview() => Navigation.NavigateTo($"/templates/{Template.Id}/preview");
+}
