@@ -43,29 +43,89 @@ public static class FallbackData
 
     public static List<TemplateDto> CreateTemplates()
     {
+        var standardConfig = new TemplateConfigDto
+        {
+            Layout = TemplateLayouts.Grid,
+            Theme = TemplateThemes.Dark
+        };
+
+        standardConfig.SetWidgetItems(new[]
+        {
+            new TemplateWidgetDto
+            {
+                Id = "widget-news-main",
+                Type = WidgetTypes.News,
+                Title = "Новости УК",
+                Order = 1,
+                Size = WidgetSizes.Wide,
+                Settings = new Dictionary<string, string>
+                {
+                    ["building_id"] = "141",
+                    ["limit"] = "3"
+                }
+            },
+            new TemplateWidgetDto
+            {
+                Id = "widget-parking-main",
+                Type = WidgetTypes.Parking,
+                Title = "Свободные парковки",
+                Order = 2,
+                Size = WidgetSizes.Normal,
+                Settings = new Dictionary<string, string>
+                {
+                    ["building_id"] = "141"
+                }
+            }
+        });
+
+        var eveningConfig = new TemplateConfigDto
+        {
+            Layout = TemplateLayouts.Split,
+            Theme = TemplateThemes.Light
+        };
+
+        eveningConfig.SetWidgetItems(new[]
+        {
+            new TemplateWidgetDto
+            {
+                Id = "widget-news-evening",
+                Type = WidgetTypes.News,
+                Title = "Объявления и новости",
+                Order = 1,
+                Size = WidgetSizes.Wide,
+                Settings = new Dictionary<string, string>
+                {
+                    ["building_id"] = "141",
+                    ["limit"] = "2"
+                }
+            },
+            new TemplateWidgetDto
+            {
+                Id = "widget-storage-evening",
+                Type = WidgetTypes.Storage,
+                Title = "Свободные кладовые",
+                Order = 2,
+                Size = WidgetSizes.Normal,
+                Settings = new Dictionary<string, string>
+                {
+                    ["building_id"] = "141"
+                }
+            }
+        });
+
         return new List<TemplateDto>
         {
             new()
             {
                 Id = "uuid-template-123",
                 Name = "Стандартная сетка",
-                Config = new TemplateConfigDto
-                {
-                    Layout = "grid",
-                    Widgets = new List<string> { "news", "parking" },
-                    Theme = "dark"
-                }
+                Config = standardConfig
             },
             new()
             {
                 Id = "uuid-template-evening",
                 Name = "Вечерний информационный",
-                Config = new TemplateConfigDto
-                {
-                    Layout = "split",
-                    Widgets = new List<string> { "news", "storage" },
-                    Theme = "light"
-                }
+                Config = eveningConfig
             }
         };
     }
