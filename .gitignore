@@ -3,10 +3,9 @@
 ################################################################################
 
 /frontend/.vs/SmartDisplay.Frontend.slnx
-/frontend/SmartDisplay.ConrolPanelClient/bin/Debug/net10.0
-/frontend/SmartDisplay.ConrolPanelClient/obj
 /frontend/.vs
 /frontend/SmartDisplay.ControlPanelClient/bin/Debug/net10.0
 /frontend/SmartDisplay.ControlPanelClient/obj
 /frontend/SmartDisplay.Shared/obj
 /frontend/SmartDisplay.Shared/bin/Debug/net10.0
+/frontend/SmartDisplay.ScreenClient/obj

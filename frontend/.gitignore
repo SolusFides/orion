@@ -1,0 +1,25 @@
+# .NET build output
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider / JetBrains
+.idea/
+
+# VS Code personal settings
+.vscode/
+
+# Local packages and temp files
+*.zip
+*.tmp
+*.log
+
+# Visual Studio local launch profiles
+*.slnLaunch.user
+*.slnx.user
