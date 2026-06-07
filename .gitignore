@@ -1,6 +1,4 @@
-﻿################################################################################
-# Данный GITIGNORE-файл был автоматически создан Microsoft(R) Visual Studio.
-################################################################################
+# Frontend
 
 /frontend/.vs/SmartDisplay.Frontend.slnx
 /frontend/.vs
@@ -9,3 +7,30 @@
 /frontend/SmartDisplay.Shared/obj
 /frontend/SmartDisplay.Shared/bin/Debug/net10.0
 /frontend/SmartDisplay.ScreenClient/obj
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Local database
+*.sqlite3
+*.sqlite3-journal
+api_gateway/data/
+
+# Environment variables
+.env
+!.env.example
+
+# IDE & Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store

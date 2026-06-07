@@ -1,0 +1,28 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from app.routers import auth, screens, templates, emergency, ujin, client
+
+app = FastAPI(
+    title="Orion API Gateway",
+    description="API for managing Smart LCD Displays and Emergency alerts.",
+    version="1.0.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(auth.router)
+app.include_router(screens.router)
+app.include_router(templates.router)
+app.include_router(emergency.router)
+app.include_router(ujin.router)
+app.include_router(client.router)
+
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
