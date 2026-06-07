@@ -1,0 +1,36 @@
+@using SmartDisplay.Shared.Models.Templates
+
+@if (Template is null)
+{
+    <div class="template-summary empty">Шаблон не выбран.</div>
+}
+else
+{
+    var widgets = Template.Config.GetEffectiveWidgets();
+
+    <div class="template-summary">
+        <div class="summary-head">
+            <div>
+                <strong>@Template.Name</strong>
+                <span>@TemplateLayouts.GetDisplayName(Template.Config.Layout) · @TemplateThemes.GetDisplayName(Template.Config.Theme)</span>
+            </div>
+            <em>@Template.Config.SafeColumns кол.</em>
+        </div>
+
+        <div class="summary-grid" style="@($"--columns:{Template.Config.SafeColumns}; --gap:{Template.Config.SafeGap}px;")">
+            @foreach (var widget in widgets)
+            {
+                var normalized = widget.CloneNormalized(Template.Config.SafeColumns);
+                <article class="summary-widget" style="grid-column: span @normalized.ColSpan; grid-row: span @normalized.RowSpan;">
+                    <strong>@normalized.DisplayTitle</strong>
+                    <span>@WidgetTypes.GetDisplayName(normalized.Type)</span>
+                    <small>@WidgetSizes.GetDisplayName(normalized.Size) · @normalized.ColSpan×@normalized.RowSpan</small>
+                </article>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public TemplateDto? Template { get; set; }
+}

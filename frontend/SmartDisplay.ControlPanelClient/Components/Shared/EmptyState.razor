@@ -1,0 +1,11 @@
+<div class="empty-state">
+    <div class="empty-icon">@Icon</div>
+    <h2>@Title</h2>
+    <p>@Text</p>
+</div>
+
+@code {
+    [Parameter] public string Icon { get; set; } = "·";
+    [Parameter] public string Title { get; set; } = "Нет данных";
+    [Parameter] public string Text { get; set; } = "Создайте запись или измените параметры фильтра.";
+}

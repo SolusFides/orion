@@ -1,0 +1,35 @@
+.quick-action {
+    display: grid;
+    gap: 10px;
+    padding: 22px;
+    border-radius: 18px;
+    background: var(--ui-card);
+    border: 1px solid transparent;
+    color: var(--ui-text);
+    text-decoration: none;
+    transition: background .16s ease, transform .16s ease;
+}
+
+.quick-action:hover {
+    background: var(--ui-card-hover);
+    transform: translateY(-2px);
+}
+
+.quick-arrow {
+    justify-self: end;
+    color: var(--ui-text);
+    font-weight: 900;
+}
+
+.quick-title {
+    color: var(--ui-text);
+    font-size: 18px;
+    font-weight: 850;
+    letter-spacing: -.02em;
+}
+
+.quick-text {
+    color: var(--ui-muted);
+    font-size: 14px;
+    line-height: 1.35;
+}

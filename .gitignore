@@ -1,3 +1,13 @@
+# Frontend
+
+/frontend/.vs/SmartDisplay.Frontend.slnx
+/frontend/.vs
+/frontend/SmartDisplay.ControlPanelClient/bin/Debug/net10.0
+/frontend/SmartDisplay.ControlPanelClient/obj
+/frontend/SmartDisplay.Shared/obj
+/frontend/SmartDisplay.Shared/bin/Debug/net10.0
+/frontend/SmartDisplay.ScreenClient/obj
+
 # Python cache
 __pycache__/
 *.py[cod]
@@ -24,5 +34,3 @@ api_gateway/data/
 *.swp
 *.swo
 .DS_Store
-
-

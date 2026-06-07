@@ -1,0 +1,222 @@
+@page "/emergency"
+
+@using SmartDisplay.Shared.Models.Emergency
+@using SmartDisplay.Shared.Models.Screens
+@using SmartDisplay.ControlPanelClient.Services.Auth
+@using SmartDisplay.ControlPanelClient.Services.Emergency
+@using SmartDisplay.ControlPanelClient.Services.Screens
+
+@inject AuthState AuthState
+@inject IEmergencyService EmergencyService
+@inject IScreensService ScreensService
+
+<PageTitle>Режим ЧС | Умный дисплей ЖК</PageTitle>
+
+@if (!AuthState.IsAuthenticated)
+{
+    <EmptyState Icon="!" Title="Нужен вход" Text="Авторизуйтесь, чтобы управлять режимом ЧС." />
+}
+else
+{
+    <AppPageHeader
+        Kicker="ЧС"
+        Title="Режим чрезвычайной ситуации"
+        Subtitle="ЧС накладывается поверх любого шаблона и отправляется адресно: на экран, подъезд, дом или все дисплеи." />
+
+    <div class="emergency-grid">
+        <section class="emergency-form">
+            <div class="field">
+                <label>Текст сообщения</label>
+                <textarea rows="5" @bind="text" @bind:event="oninput" placeholder="ВНИМАНИЕ!!! Задымление в холле третьего подъезда!"></textarea>
+            </div>
+
+            <div class="field-row">
+                <div class="field">
+                    <label>Цель отправки</label>
+                    <select @bind="selectedTarget">
+                        <option value="all">Все экраны</option>
+                        @foreach (var building in BuildingGroups)
+                        {
+                            <option value="building:@building.BuildingId">Дом @building.BuildingId (@building.Count экранов)</option>
+                        }
+                        @foreach (var entrance in EntranceGroups)
+                        {
+                            <option value="entrance:@entrance.BuildingId:@entrance.Entrance">Дом @entrance.BuildingId, подъезд @entrance.Entrance (@entrance.Count экранов)</option>
+                        }
+                        @foreach (var screen in screens)
+                        {
+                            <option value="screen:@screen.Id">@screen.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Таймаут, минут</label>
+                    <input type="number" min="1" max="180" @bind="timeoutMinutes" />
+                </div>
+            </div>
+
+            <div class="target-summary">
+                Получателей: <strong>@ResolveSelectedTarget().Count</strong>
+            </div>
+
+            <EmergencyBannerPreview Text="@text" IsDoubleHeight="@(text.Length > 80)" />
+
+            <div class="emergency-actions">
+                <button type="button" class="danger" @onclick="ActivateAsync" disabled="@string.IsNullOrWhiteSpace(text)">Активировать ЧС</button>
+                <button type="button" class="secondary" @onclick="ResetAsync">Сбросить ЧС</button>
+            </div>
+        </section>
+
+        <section class="emergency-side">
+            <div class="panel-card">
+                <h2>Активные ЧС</h2>
+                @if (activeEmergencies.Count == 0)
+                {
+                    <p class="muted">Активных сообщений сейчас нет.</p>
+                }
+                else
+                {
+                    @foreach (var item in activeEmergencies)
+                    {
+                        <article class="emergency-item">
+                            <strong>@item.Text</strong>
+                            <span>@FormatTargets(item.TargetScreens) · @item.CreatedAt.ToString("dd.MM HH:mm")</span>
+                        </article>
+                    }
+                }
+            </div>
+
+            <div class="panel-card">
+                <h2>Журнал действий</h2>
+                @foreach (var item in log.Take(6))
+                {
+                    <article class="log-item">
+                        <strong>@FormatAction(item.Action)</strong>
+                        <span>@item.UserId · @FormatTargets(item.TargetScreens) · @item.CreatedAt.ToString("dd.MM HH:mm")</span>
+                    </article>
+                }
+            </div>
+        </section>
+    </div>
+}
+
+@code {
+    private List<ScreenDto> screens = new();
+    private List<EmergencyActiveDto> activeEmergencies = new();
+    private List<EmergencyLogDto> log = new();
+    private string text = "ВНИМАНИЕ!!! Проверка системы экстренного оповещения.";
+    private string selectedTarget = "all";
+    private int timeoutMinutes = 30;
+
+    private IEnumerable<(int BuildingId, int Count)> BuildingGroups => screens
+        .GroupBy(screen => screen.BuildingId)
+        .OrderBy(group => group.Key)
+        .Select(group => (group.Key, group.Count()));
+
+    private IEnumerable<(int BuildingId, int Entrance, int Count)> EntranceGroups => screens
+        .GroupBy(screen => new { screen.BuildingId, screen.Entrance })
+        .OrderBy(group => group.Key.BuildingId)
+        .ThenBy(group => group.Key.Entrance)
+        .Select(group => (group.Key.BuildingId, group.Key.Entrance, group.Count()));
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.IsAuthenticated)
+        {
+            return;
+        }
+
+        screens = await ScreensService.GetScreensAsync();
+        await LoadEmergencyAsync();
+    }
+
+    private async Task LoadEmergencyAsync()
+    {
+        activeEmergencies = await EmergencyService.GetActiveAsync();
+        log = await EmergencyService.GetLogAsync();
+    }
+
+    private async Task ActivateAsync()
+    {
+        var targetScreenIds = ResolveSelectedTarget();
+
+        if (targetScreenIds.Count == 0 || string.IsNullOrWhiteSpace(text))
+        {
+            return;
+        }
+
+        await EmergencyService.ActivateAsync(new EmergencyActivateRequest
+        {
+            Text = text.Trim(),
+            ScreenIds = targetScreenIds,
+            Priority = 1,
+            TimeoutMinutes = timeoutMinutes
+        });
+
+        await LoadEmergencyAsync();
+    }
+
+    private async Task ResetAsync()
+    {
+        var targetScreenIds = ResolveSelectedTarget();
+
+        if (targetScreenIds.Count == 0)
+        {
+            return;
+        }
+
+        await EmergencyService.ResetAsync(new EmergencyResetRequest
+        {
+            ScreenIds = targetScreenIds
+        });
+
+        await LoadEmergencyAsync();
+    }
+
+    private List<string> ResolveSelectedTarget()
+    {
+        if (selectedTarget == "all")
+        {
+            return new List<string> { "all" };
+        }
+
+        if (selectedTarget.StartsWith("screen:", StringComparison.OrdinalIgnoreCase))
+        {
+            return new List<string> { selectedTarget.Replace("screen:", string.Empty, StringComparison.OrdinalIgnoreCase) };
+        }
+
+        if (selectedTarget.StartsWith("building:", StringComparison.OrdinalIgnoreCase))
+        {
+            var value = selectedTarget.Replace("building:", string.Empty, StringComparison.OrdinalIgnoreCase);
+            return int.TryParse(value, out var buildingId)
+                ? screens.Where(screen => screen.BuildingId == buildingId).Select(screen => screen.Id).ToList()
+                : new List<string>();
+        }
+
+        if (selectedTarget.StartsWith("entrance:", StringComparison.OrdinalIgnoreCase))
+        {
+            var parts = selectedTarget.Split(':');
+            if (parts.Length == 3 && int.TryParse(parts[1], out var buildingId) && int.TryParse(parts[2], out var entrance))
+            {
+                return screens
+                    .Where(screen => screen.BuildingId == buildingId && screen.Entrance == entrance)
+                    .Select(screen => screen.Id)
+                    .ToList();
+            }
+        }
+
+        return new List<string>();
+    }
+
+    private static string FormatTargets(IEnumerable<string> targetScreens)
+    {
+        var targets = targetScreens.ToList();
+        return targets.Contains("all", StringComparer.OrdinalIgnoreCase) ? "все экраны" : string.Join(", ", targets);
+    }
+
+    private static string FormatAction(string action)
+    {
+        return action.Equals("activate", StringComparison.OrdinalIgnoreCase) ? "Активация" : "Сброс";
+    }
+}

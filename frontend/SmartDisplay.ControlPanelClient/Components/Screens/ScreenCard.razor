@@ -1,0 +1,41 @@
+@using SmartDisplay.Shared.Models.Screens
+
+<article class="screen-card">
+    <div class="screen-card-head">
+        <div>
+            <h3>@Screen.Name</h3>
+            <div class="screen-id">@Screen.Id</div>
+        </div>
+        <StatusBadge Text="@(Screen.HasTemplate ? "Шаблон назначен" : "Без шаблона")" Variant="@(Screen.HasTemplate ? "success" : "warning")" />
+    </div>
+
+    <dl class="screen-meta">
+        <div>
+            <dt>ЖК</dt>
+            <dd>@Screen.ComplexId</dd>
+        </div>
+        <div>
+            <dt>Дом</dt>
+            <dd>@Screen.BuildingId</dd>
+        </div>
+        <div>
+            <dt>Подъезд</dt>
+            <dd>@Screen.Entrance</dd>
+        </div>
+    </dl>
+
+    <div class="screen-template">
+        <span>Текущий шаблон</span>
+        <strong>@(Screen.CurrentTemplateId ?? "Не назначен")</strong>
+    </div>
+
+    <a class="screen-client-link" href="@ClientUrl" target="_blank" rel="noreferrer">
+        Открыть клиент экрана
+    </a>
+</article>
+
+@code {
+    [Parameter, EditorRequired] public ScreenDto Screen { get; set; } = new();
+
+    private string ClientUrl => $"http://localhost:27762/screen/{Uri.EscapeDataString(Screen.Id)}";
+}

@@ -1,0 +1,47 @@
+@using SmartDisplay.ControlPanelClient.Services.Auth
+@inject AuthState AuthState
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+<header class="topbar">
+    <a class="topbar-brand" href="dashboard" aria-label="Smart display dashboard">
+        <span class="brand-mark">u</span>
+        <span class="brand-word">ujin</span>
+        <span class="brand-caption">Smart display</span>
+    </a>
+
+    <nav class="topbar-nav" aria-label="Main navigation">
+        <NavLink class="topbar-link" href="dashboard">Dashboard</NavLink>
+        <NavLink class="topbar-link" href="screens">Display</NavLink>
+        <NavLink class="topbar-link" href="templates">Templates</NavLink>
+        <NavLink class="topbar-link" href="emergency">Emergency</NavLink>
+        <NavLink class="topbar-link" href="contact">Contact us</NavLink>
+        <NavLink class="topbar-link" href="settings">Settings</NavLink>
+    </nav>
+
+    <div class="topbar-user">
+        <div class="user-meta">
+            <strong>Copper Residence</strong>
+            <span>@UserLine</span>
+        </div>
+        <button type="button" class="user-avatar" title="Выйти" @onclick="LogoutAsync">CR</button>
+    </div>
+</header>
+
+@code {
+    private string UserLine
+    {
+        get
+        {
+            var name = string.IsNullOrWhiteSpace(AuthState.UserName) ? "admin" : AuthState.UserName;
+            var expires = AuthState.CurrentSession?.ExpiresAt.ToString("HH:mm") ?? "--:--";
+            return $"{name} · session until {expires}";
+        }
+    }
+
+    private async Task LogoutAsync()
+    {
+        await AuthService.LogoutAsync();
+        Navigation.NavigateTo("/login");
+    }
+}

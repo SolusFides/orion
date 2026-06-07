@@ -1,0 +1,66 @@
+.events-card {
+    padding: 22px 26px;
+    border-radius: 18px;
+    background: var(--ui-card);
+    border: 1px solid transparent;
+}
+
+.events-title {
+    margin: 0 0 18px;
+    color: var(--ui-text);
+    font-size: 20px;
+    line-height: 1;
+    font-weight: 850;
+    letter-spacing: -.03em;
+}
+
+.events-empty {
+    margin: 0;
+    color: var(--ui-muted);
+}
+
+.events-list {
+    display: grid;
+    gap: 0;
+}
+
+.event-item {
+    display: grid;
+    grid-template-columns: 10px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    min-height: 54px;
+    border-top: 1px solid rgba(17,17,17,.08);
+}
+
+.event-item:first-child { border-top: 0; }
+
+.event-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #777;
+}
+
+.event-success .event-dot { background: var(--ui-green); }
+.event-warning .event-dot { background: #b7791f; }
+.event-danger .event-dot { background: var(--ui-red-strong); }
+
+.event-title {
+    color: var(--ui-text);
+    font-weight: 740;
+    line-height: 1.2;
+}
+
+.event-description {
+    color: var(--ui-muted);
+    font-size: 13px;
+    line-height: 1.25;
+    margin-top: 3px;
+}
+
+.event-time {
+    color: var(--ui-muted);
+    font-size: 13px;
+    white-space: nowrap;
+}

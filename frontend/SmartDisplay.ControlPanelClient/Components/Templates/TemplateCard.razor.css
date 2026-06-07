@@ -1,0 +1,110 @@
+.template-card {
+    min-height: 238px;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    border-radius: 18px;
+    background: var(--ui-card);
+    border: 1px solid transparent;
+    transition: background .16s ease, transform .16s ease;
+}
+
+.template-card:hover {
+    background: var(--ui-card-hover);
+    transform: translateY(-1px);
+}
+
+.template-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.template-head h3 {
+    margin: 0;
+    color: var(--ui-text);
+    font-size: 18px;
+    font-weight: 850;
+    letter-spacing: -.03em;
+}
+
+.template-id {
+    margin-top: 6px;
+    color: var(--ui-muted);
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 12px;
+}
+
+.template-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin: 18px 0;
+}
+
+.template-grid div {
+    padding: 12px;
+    border-radius: 14px;
+    background: rgba(255,255,255,.32);
+}
+
+.template-grid span {
+    display: block;
+    color: var(--ui-muted);
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.template-grid strong {
+    display: block;
+    margin-top: 5px;
+    color: var(--ui-text);
+    font-size: 17px;
+    font-weight: 880;
+}
+
+.widget-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 18px;
+}
+
+.widget-tags span {
+    padding: 6px 9px;
+    border-radius: 999px;
+    color: #111;
+    background: rgba(255,255,255,.45);
+    border: 1px solid rgba(17,17,17,.08);
+    font-size: 11px;
+    font-weight: 740;
+}
+
+.template-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: auto;
+}
+
+.template-actions button {
+    min-height: 38px;
+    padding: 0 14px;
+    border-radius: 999px;
+    color: #fff;
+    background: #111;
+    font-size: 12px;
+    font-weight: 780;
+}
+
+.template-actions .secondary {
+    color: #111;
+    background: rgba(255,255,255,.48);
+}
+
+.template-actions .danger {
+    color: #111;
+    background: var(--ui-red);
+}

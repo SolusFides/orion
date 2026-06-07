@@ -1,0 +1,70 @@
+@using SmartDisplay.Shared.Models.Templates
+
+@if (Template is null)
+{
+    <div class="screen-message inline">
+        <h1>Нет шаблона</h1>
+        <p>Данные для отображения не получены</p>
+    </div>
+}
+else
+{
+    var widgets = Template.Config.GetEffectiveWidgets();
+    var usedSlots = new HashSet<string>();
+
+    <div class="fixed-template-grid">
+        @for (var index = 0; index < widgets.Count; index++)
+        {
+            var widget = widgets[index].CloneNormalized(9);
+            var slotClass = ResolveSlotClass(widget.Type, index, usedSlots);
+
+            <div class="fixed-grid-item @slotClass">
+                <WidgetRenderer Widget="widget" />
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired] public TemplateDto? Template { get; set; }
+
+    private static string ResolveSlotClass(string widgetType, int index, HashSet<string> usedSlots)
+    {
+        var preferredSlot = widgetType switch
+        {
+            WidgetTypes.News => "slot-news",
+            WidgetTypes.Parking => "slot-parking",
+            WidgetTypes.Storage => "slot-storage",
+            WidgetTypes.Weather => "slot-weather",
+            WidgetTypes.Rss => "slot-feed",
+            WidgetTypes.Camera => "slot-feed",
+            WidgetTypes.StaticText => "slot-info",
+            _ => "slot-info"
+        };
+
+        if (usedSlots.Add(preferredSlot))
+        {
+            return preferredSlot;
+        }
+
+        var fallbackSlots = new[]
+        {
+            "slot-news",
+            "slot-parking",
+            "slot-storage",
+            "slot-weather",
+            "slot-feed",
+            "slot-info"
+        };
+
+        foreach (var slot in fallbackSlots)
+        {
+            if (usedSlots.Add(slot))
+            {
+                return slot;
+            }
+        }
+
+        return index % 2 == 0 ? "slot-parking" : "slot-storage";
+    }
+}

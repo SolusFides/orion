@@ -1,0 +1,75 @@
+@page "/screen"
+@page "/screen/{ScreenId}"
+@implements IDisposable
+
+@inject IClientScreenService ClientScreenService
+
+<PageTitle>@ScreenId | Умный дисплей ЖК</PageTitle>
+
+@if (screen is null)
+{
+    <main class="screen-page screen-message">
+        <h1>Загрузка экрана</h1>
+        <p>@ScreenId</p>
+    </main>
+}
+else
+{
+    <ScreenShell Screen="screen" />
+}
+
+@code {
+    [Parameter] public string ScreenId { get; set; } = "main_hall_01";
+
+    private ClientScreenResponse? screen;
+    private PeriodicTimer? timer;
+    private CancellationTokenSource? cts;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadAsync();
+        StartPolling();
+    }
+
+    private async Task LoadAsync()
+    {
+        screen = await ClientScreenService.GetScreenAsync(ScreenId);
+    }
+
+    private void StartPolling()
+    {
+        cts?.Cancel();
+        timer?.Dispose();
+
+        cts = new CancellationTokenSource();
+        timer = new PeriodicTimer(TimeSpan.FromSeconds(10));
+        _ = PollAsync(cts.Token);
+    }
+
+    private async Task PollAsync(CancellationToken token)
+    {
+        if (timer is null)
+        {
+            return;
+        }
+
+        try
+        {
+            while (await timer.WaitForNextTickAsync(token))
+            {
+                screen = await ClientScreenService.GetScreenAsync(ScreenId);
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
+
+    public void Dispose()
+    {
+        cts?.Cancel();
+        cts?.Dispose();
+        timer?.Dispose();
+    }
+}

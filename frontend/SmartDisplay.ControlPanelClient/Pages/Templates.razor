@@ -1,0 +1,76 @@
+@page "/templates"
+
+@using SmartDisplay.Shared.Models.Templates
+@using SmartDisplay.ControlPanelClient.Services.Auth
+@using SmartDisplay.ControlPanelClient.Services.Templates
+
+@inject AuthState AuthState
+@inject ITemplatesService TemplatesService
+@inject NavigationManager Navigation
+
+<PageTitle>Шаблоны | Умный дисплей ЖК</PageTitle>
+
+@if (!AuthState.IsAuthenticated)
+{
+    <EmptyState Icon="!" Title="Нужен вход" Text="Авторизуйтесь, чтобы создавать и назначать шаблоны." />
+}
+else
+{
+    <AppPageHeader
+        Kicker="Шаблоны"
+        Title="Шаблоны дисплеев"
+        Subtitle="Создание, редактирование, предпросмотр и удаление шаблонов с наборами виджетов.">
+        <button type="button" class="page-button" @onclick="CreateTemplate">Создать шаблон</button>
+    </AppPageHeader>
+
+    @if (!string.IsNullOrWhiteSpace(statusMessage))
+    {
+        <div class="templates-status">@statusMessage</div>
+    }
+
+    @if (templates.Count == 0)
+    {
+        <EmptyState Icon="▦" Title="Список шаблонов пуст" Text="Создайте первый шаблон с новостями, парковками или постоянной информацией." />
+    }
+    else
+    {
+        <section class="templates-grid">
+            @foreach (var template in templates)
+            {
+                <TemplateCard Template="template" OnDeleteRequested="DeleteTemplateAsync" />
+            }
+        </section>
+    }
+}
+
+@code {
+    private List<TemplateDto> templates = new();
+    private string statusMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.IsAuthenticated)
+        {
+            return;
+        }
+
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        templates = await TemplatesService.GetTemplatesAsync();
+    }
+
+    private async Task DeleteTemplateAsync(string templateId)
+    {
+        var response = await TemplatesService.DeleteTemplateAsync(templateId);
+        statusMessage = response.Status.Equals("success", StringComparison.OrdinalIgnoreCase)
+            ? "Шаблон удалён."
+            : "Не удалось удалить шаблон.";
+
+        await LoadAsync();
+    }
+
+    private void CreateTemplate() => Navigation.NavigateTo("/templates/create");
+}

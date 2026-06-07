@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "SmartDisplay.ScreenClient": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:27761;http://localhost:27762"
+    }
+  }
+}

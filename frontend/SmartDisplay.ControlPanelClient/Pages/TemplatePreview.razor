@@ -1,0 +1,68 @@
+@page "/templates/{TemplateId}/preview"
+
+@using System
+@using SmartDisplay.Shared.Models.Templates
+@using SmartDisplay.ControlPanelClient.Services.Auth
+@using SmartDisplay.ControlPanelClient.Services.Templates
+
+@inject AuthState AuthState
+@inject ITemplatesService TemplatesService
+@inject NavigationManager Navigation
+
+<PageTitle>Предпросмотр шаблона | Умный дисплей ЖК</PageTitle>
+
+@if (!AuthState.IsAuthenticated)
+{
+    <EmptyState Icon="!" Title="Нужен вход" Text="Авторизуйтесь, чтобы открывать предпросмотр шаблонов." />
+}
+else if (template is null)
+{
+    <EmptyState Icon="▦" Title="Шаблон не найден" Text="Проверьте идентификатор шаблона или вернитесь к списку." />
+}
+else
+{
+    <AppPageHeader
+        Kicker="Предпросмотр"
+        Title="Предпросмотр шаблона"
+        Subtitle="Визуальная проверка через клиент экрана в формате 9:16. Интерактивные элементы дисплея не используются.">
+        <div class="preview-actions">
+            <a class="page-button" href="@ClientPreviewUrl" target="_blank" rel="noreferrer">Открыть в отдельном окне</a>
+            <button type="button" class="page-button secondary" @onclick="Back">Назад</button>
+        </div>
+    </AppPageHeader>
+
+    <section class="preview-layout">
+        <div class="preview-frame-shell">
+            <div class="preview-frame">
+                <iframe src="@ClientPreviewUrl" title="Предпросмотр шаблона @template.Name"></iframe>
+            </div>
+            <p>
+                Если область предпросмотра пустая, запустите проект <strong>SmartDisplay.ScreenClient</strong>
+                и откройте предпросмотр в отдельном окне.
+            </p>
+        </div>
+
+        <aside class="preview-info">
+            <TemplateStructureSummary Template="template" />
+        </aside>
+    </section>
+}
+
+@code {
+    [Parameter] public string TemplateId { get; set; } = string.Empty;
+    private TemplateDto? template;
+
+    private string ClientPreviewUrl => $"http://localhost:27762/preview/template/{Uri.EscapeDataString(TemplateId)}";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.IsAuthenticated)
+        {
+            return;
+        }
+
+        template = await TemplatesService.GetTemplateByIdAsync(TemplateId);
+    }
+
+    private void Back() => Navigation.NavigateTo("/templates");
+}

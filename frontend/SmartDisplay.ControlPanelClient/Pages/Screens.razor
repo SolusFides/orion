@@ -1,0 +1,267 @@
+@page "/screens"
+
+@using Microsoft.AspNetCore.Components
+@using SmartDisplay.Shared.Models.Screens
+@using SmartDisplay.Shared.Models.Templates
+@using SmartDisplay.ControlPanelClient.Services.Auth
+@using SmartDisplay.ControlPanelClient.Services.Screens
+@using SmartDisplay.ControlPanelClient.Services.Templates
+
+@inject AuthState AuthState
+@inject IScreensService ScreensService
+@inject ITemplatesService TemplatesService
+@inject NavigationManager Navigation
+
+<PageTitle>Экраны | Умный дисплей ЖК</PageTitle>
+
+@if (!AuthState.IsAuthenticated)
+{
+    <EmptyState Icon="!" Title="Нужен вход" Text="Авторизуйтесь, чтобы управлять экранами." />
+}
+else
+{
+    <AppPageHeader
+        Kicker="Экраны"
+        Title="Управление экранами"
+        Subtitle="Группировка по ЖК, домам и подъездам. Назначение шаблонов на один экран или группу экранов.">
+        <button type="button" class="page-button" @onclick="AddScreenAsync">Добавить экран</button>
+    </AppPageHeader>
+
+    <section class="screen-summary">
+        <button type="button" class="summary-tile @(IsView("all") ? "active" : null)" @onclick="ShowAllScreens">
+            <span>Все экраны</span>
+            <strong>@screens.Count</strong>
+        </button>
+        <button type="button" class="summary-tile @(IsView("assigned") ? "active" : null)" @onclick="ShowAssignedScreens">
+            <span>С шаблоном</span>
+            <strong>@screens.Count(screen => screen.HasTemplate)</strong>
+        </button>
+        <button type="button" class="summary-tile @(IsView("empty") ? "active" : null)" @onclick="ShowEmptyScreens">
+            <span>Без шаблона</span>
+            <strong>@screens.Count(screen => !screen.HasTemplate)</strong>
+        </button>
+        <button type="button" class="summary-tile @(IsView("groups") ? "active" : null)" @onclick="ShowGroupedScreens">
+            <span>Подъезды</span>
+            <strong>@EntranceGroups.Count()</strong>
+        </button>
+    </section>
+
+    <section class="assign-panel">
+        <div>
+            <h2>Назначить шаблон</h2>
+            <p>Можно выбрать все экраны, конкретный дом, подъезд или отдельную панель.</p>
+        </div>
+
+        <div class="assign-controls">
+            <select @bind="selectedTemplateId">
+                <option value="">Выберите шаблон</option>
+                @foreach (var template in templates)
+                {
+                    <option value="@template.Id">@template.Name</option>
+                }
+            </select>
+
+            <select @bind="selectedTarget">
+                <option value="all">Все экраны</option>
+                @foreach (var building in BuildingGroups)
+                {
+                    <option value="building:@building.BuildingId">Дом @building.BuildingId (@building.Count экранов)</option>
+                }
+                @foreach (var entrance in EntranceGroups)
+                {
+                    <option value="entrance:@entrance.BuildingId:@entrance.Entrance">Дом @entrance.BuildingId, подъезд @entrance.Entrance (@entrance.Count экранов)</option>
+                }
+                @foreach (var screen in screens)
+                {
+                    <option value="screen:@screen.Id">@screen.Name</option>
+                }
+            </select>
+
+            <button type="button" @onclick="AssignTemplateAsync">Назначить</button>
+        </div>
+    </section>
+
+    @if (FilteredScreens.Count == 0)
+    {
+        <EmptyState Icon="▣" Title="Экранов нет" Text="По выбранному фильтру ничего не найдено." />
+    }
+    else
+    {
+        <section class="screen-groups">
+            @foreach (var complexGroup in FilteredScreens.GroupBy(screen => screen.ComplexId).OrderBy(group => group.Key))
+            {
+                <article class="complex-group">
+                    <header class="complex-header">
+                        <div>
+                            <span>ЖК</span>
+                            <h2>@complexGroup.Key</h2>
+                        </div>
+                        <strong>@complexGroup.Count() экранов</strong>
+                    </header>
+
+                    @foreach (var buildingGroup in complexGroup.GroupBy(screen => screen.BuildingId).OrderBy(group => group.Key))
+                    {
+                        <section class="building-group">
+                            <div class="building-header">
+                                <h3>Дом @buildingGroup.Key</h3>
+                                <span>@buildingGroup.Count() экранов</span>
+                            </div>
+
+                            @foreach (var entranceGroup in buildingGroup.GroupBy(screen => screen.Entrance).OrderBy(group => group.Key))
+                            {
+                                <section class="entrance-group">
+                                    <div class="entrance-header">
+                                        <h4>Подъезд @entranceGroup.Key</h4>
+                                        <span>@entranceGroup.Count() экранов</span>
+                                    </div>
+
+                                    <div class="screens-grid">
+                                        @foreach (var screen in entranceGroup.OrderBy(screen => screen.Name))
+                                        {
+                                            <ScreenCard Screen="screen" />
+                                        }
+                                    </div>
+                                </section>
+                            }
+                        </section>
+                    }
+                </article>
+            }
+        </section>
+    }
+}
+
+@code {
+    [SupplyParameterFromQuery(Name = "view")]
+    public string? View { get; set; }
+
+    private List<ScreenDto> screens = new();
+    private List<TemplateDto> templates = new();
+    private string selectedTemplateId = string.Empty;
+    private string selectedTarget = "all";
+
+    private string CurrentView => string.IsNullOrWhiteSpace(View) ? "all" : View;
+
+    private List<ScreenDto> FilteredScreens => CurrentView switch
+    {
+        "assigned" => screens.Where(screen => screen.HasTemplate).ToList(),
+        "empty" => screens.Where(screen => !screen.HasTemplate).ToList(),
+        _ => screens.ToList()
+    };
+
+    private IEnumerable<(int BuildingId, int Count)> BuildingGroups => screens
+        .GroupBy(screen => screen.BuildingId)
+        .OrderBy(group => group.Key)
+        .Select(group => (group.Key, group.Count()));
+
+    private IEnumerable<(int BuildingId, int Entrance, int Count)> EntranceGroups => screens
+        .GroupBy(screen => new { screen.BuildingId, screen.Entrance })
+        .OrderBy(group => group.Key.BuildingId)
+        .ThenBy(group => group.Key.Entrance)
+        .Select(group => (group.Key.BuildingId, group.Key.Entrance, group.Count()));
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.IsAuthenticated)
+        {
+            return;
+        }
+
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        screens = await ScreensService.GetScreensAsync();
+        templates = await TemplatesService.GetTemplatesAsync();
+        selectedTemplateId = templates.FirstOrDefault()?.Id ?? string.Empty;
+    }
+
+    private async Task AssignTemplateAsync()
+    {
+        if (string.IsNullOrWhiteSpace(selectedTemplateId))
+        {
+            return;
+        }
+
+        var targetScreenIds = ResolveSelectedTarget();
+
+        if (targetScreenIds.Count == 0)
+        {
+            return;
+        }
+
+        await ScreensService.AssignTemplateAsync(new AssignScreensRequest
+        {
+            ScreenIds = targetScreenIds,
+            TemplateId = selectedTemplateId
+        });
+
+        await LoadAsync();
+    }
+
+    private List<string> ResolveSelectedTarget()
+    {
+        if (selectedTarget == "all")
+        {
+            return new List<string> { "all" };
+        }
+
+        if (selectedTarget.StartsWith("screen:", StringComparison.OrdinalIgnoreCase))
+        {
+            return new List<string> { selectedTarget.Replace("screen:", string.Empty, StringComparison.OrdinalIgnoreCase) };
+        }
+
+        if (selectedTarget.StartsWith("building:", StringComparison.OrdinalIgnoreCase))
+        {
+            var value = selectedTarget.Replace("building:", string.Empty, StringComparison.OrdinalIgnoreCase);
+            return int.TryParse(value, out var buildingId)
+                ? screens.Where(screen => screen.BuildingId == buildingId).Select(screen => screen.Id).ToList()
+                : new List<string>();
+        }
+
+        if (selectedTarget.StartsWith("entrance:", StringComparison.OrdinalIgnoreCase))
+        {
+            var parts = selectedTarget.Split(':');
+            if (parts.Length == 3 && int.TryParse(parts[1], out var buildingId) && int.TryParse(parts[2], out var entrance))
+            {
+                return screens
+                    .Where(screen => screen.BuildingId == buildingId && screen.Entrance == entrance)
+                    .Select(screen => screen.Id)
+                    .ToList();
+            }
+        }
+
+        return new List<string>();
+    }
+
+    private async Task AddScreenAsync()
+    {
+        var next = screens.Count + 1;
+        await ScreensService.SaveScreenAsync(new CreateScreenRequest
+        {
+            Id = $"screen_{next:00}",
+            Name = $"Экран {next}",
+            ComplexId = 73,
+            BuildingId = next % 2 == 0 ? 142 : 141,
+            Entrance = next % 3 == 0 ? 3 : next % 2 == 0 ? 2 : 1
+        });
+
+        await LoadAsync();
+    }
+
+    private bool IsView(string value) => CurrentView.Equals(value, StringComparison.OrdinalIgnoreCase);
+
+    private void ShowAllScreens() => SetView("all");
+
+    private void ShowAssignedScreens() => SetView("assigned");
+
+    private void ShowEmptyScreens() => SetView("empty");
+
+    private void ShowGroupedScreens() => SetView("groups");
+
+    private void SetView(string value)
+    {
+        Navigation.NavigateTo(value == "all" ? "/screens" : $"/screens?view={value}");
+    }
+}

@@ -1,0 +1,18 @@
+@inject NavigationManager Navigation
+
+<button type="button" class="quick-action" @onclick="Go">
+    <div class="quick-arrow">→</div>
+    <div class="quick-title">@Title</div>
+    <div class="quick-text">@Description</div>
+</button>
+
+@code {
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public string Description { get; set; } = string.Empty;
+    [Parameter] public string Url { get; set; } = "/dashboard";
+
+    private void Go()
+    {
+        Navigation.NavigateTo(Url);
+    }
+}

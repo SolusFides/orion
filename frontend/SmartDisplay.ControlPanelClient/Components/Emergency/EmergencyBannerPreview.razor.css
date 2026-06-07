@@ -1,0 +1,20 @@
+.emergency-preview {
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 18px;
+    border-radius: 14px;
+    background: #cc0000;
+    color: #fff;
+    text-align: center;
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: .01em;
+}
+
+.emergency-preview.double {
+    min-height: 104px;
+    font-size: 20px;
+}

@@ -1,0 +1,38 @@
+@page "/settings"
+
+@using SmartDisplay.ControlPanelClient.Services.Auth
+
+@inject AuthState AuthState
+
+<PageTitle>Настройки | Умный дисплей ЖК</PageTitle>
+
+<AppPageHeader
+    Kicker="Настройки"
+    Title="Настройки панели"
+    Subtitle="Параметры пользователя, сессии и подключения к серверу." />
+
+<section class="settings-grid">
+    <article class="settings-card">
+        <h2>Текущий пользователь</h2>
+        <dl>
+            <div>
+                <dt>Имя</dt>
+                <dd>@(string.IsNullOrWhiteSpace(AuthState.UserName) ? "Администратор УК" : AuthState.UserName)</dd>
+            </div>
+            <div>
+                <dt>Роль</dt>
+                <dd>@(string.IsNullOrWhiteSpace(AuthState.Role) ? "admin" : AuthState.Role)</dd>
+            </div>
+            <div>
+                <dt>Сессия истекает</dt>
+                <dd>@(AuthState.CurrentSession?.ExpiresAt.ToString("dd.MM.yyyy HH:mm") ?? "Нет активной сессии")</dd>
+            </div>
+        </dl>
+    </article>
+
+    <article class="settings-card">
+        <h2>API</h2>
+        <p>Admin-запросы должны отправляться с заголовком:</p>
+        <code>Authorization: Bearer &lt;access_token&gt;</code>
+    </article>
+</section>

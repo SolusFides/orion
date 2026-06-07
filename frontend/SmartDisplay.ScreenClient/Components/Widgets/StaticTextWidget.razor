@@ -1,0 +1,25 @@
+@using SmartDisplay.Shared.Models.Templates
+
+<article class="screen-widget text-widget">
+    <header class="widget-header">
+        <span>@Kicker</span>
+        <strong>@Widget.DisplayTitle</strong>
+    </header>
+
+    <p>@Text</p>
+    @if (!string.IsNullOrWhiteSpace(Subtitle))
+    {
+        <small>@Subtitle</small>
+    }
+</article>
+
+@code {
+    [Parameter, EditorRequired] public TemplateWidgetDto Widget { get; set; } = new();
+    [Parameter] public string Kicker { get; set; } = "Информация";
+
+    private string Text => Widget.Settings.TryGetValue("text", out var value) && !string.IsNullOrWhiteSpace(value)
+        ? value
+        : "Информация для жителей ЖК";
+
+    private string Subtitle => Widget.Settings.TryGetValue("subtitle", out var value) ? value : string.Empty;
+}

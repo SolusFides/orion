@@ -1,0 +1,41 @@
+@using SmartDisplay.Shared.Models.Templates
+@using SmartDisplay.Shared.Models.Ujin
+@using SmartDisplay.ScreenClient.Services
+@inject HttpClient Http
+
+<article class="screen-widget metric-widget">
+    <header class="widget-header">
+        <span>Кладовые</span>
+        <strong>@Widget.DisplayTitle</strong>
+    </header>
+
+    <div class="metric-value">@storage.TotalFree</div>
+    <p>свободных помещений</p>
+</article>
+
+@code {
+    [Parameter, EditorRequired] public TemplateWidgetDto Widget { get; set; } = new();
+
+    private StorageFreeResponse storage = ScreenFallbackData.CreateStorage();
+
+    private int ComplexId => Widget.Settings.TryGetValue("complex_id", out var complexValue) && int.TryParse(complexValue, out var complexId)
+        ? complexId
+        : 73;
+
+    private int BuildingId => Widget.Settings.TryGetValue("building_id", out var value) && int.TryParse(value, out var result)
+        ? result
+        : 141;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            var content = await Http.GetStringAsync($"api/ujin/storage/free?complex_id={ComplexId}&building_id={BuildingId}");
+            storage = UjinApiParser.ParseStorage(content);
+        }
+        catch
+        {
+            storage = ScreenFallbackData.CreateStorage();
+        }
+    }
+}

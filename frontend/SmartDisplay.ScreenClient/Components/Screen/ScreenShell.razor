@@ -1,0 +1,45 @@
+@using SmartDisplay.Shared.Models.ClientDisplay
+
+<main class="screen-root @(ThemeClass)">
+    <section class="screen-viewport">
+        @if (IsPreview)
+        {
+            <div class="preview-pill">Preview</div>
+        }
+
+        @if (Screen.ActiveEmergency is not null)
+        {
+            <EmergencyBanner Emergency="Screen.ActiveEmergency" />
+        }
+
+        <section class="screen-canvas">
+            <header class="screen-topline">
+                <div>
+                    <span>Ujin Smart display</span>
+                    <strong>@Title</strong>
+                </div>
+                <small>@Screen.ScreenId</small>
+            </header>
+
+            @if (Screen.Template is null)
+            {
+                <div class="screen-message inline">
+                    <h1>Шаблон не назначен</h1>
+                    <p>Экран @Screen.ScreenId ожидает конфигурацию</p>
+                </div>
+            }
+            else
+            {
+                <TemplateRenderer Template="Screen.Template" />
+            }
+        </section>
+    </section>
+</main>
+
+@code {
+    [Parameter, EditorRequired] public ClientScreenResponse Screen { get; set; } = new();
+    [Parameter] public bool IsPreview { get; set; }
+
+    private string ThemeClass => Screen.Template?.Config.Theme == TemplateThemes.Light ? "theme-light" : "theme-dark";
+    private string Title => Screen.Template?.Name ?? "Информационный экран";
+}

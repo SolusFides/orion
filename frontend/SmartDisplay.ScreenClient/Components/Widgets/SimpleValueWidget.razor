@@ -1,0 +1,18 @@
+@using SmartDisplay.Shared.Models.Templates
+
+<article class="screen-widget metric-widget simple-widget">
+    <header class="widget-header">
+        <span>@Kicker</span>
+        <strong>@Widget.DisplayTitle</strong>
+    </header>
+
+    <div class="metric-value">@Value</div>
+    <p>@Caption</p>
+</article>
+
+@code {
+    [Parameter, EditorRequired] public TemplateWidgetDto Widget { get; set; } = new();
+    [Parameter] public string Value { get; set; } = "—";
+    [Parameter] public string Caption { get; set; } = "";
+    [Parameter] public string Kicker { get; set; } = "Виджет";
+}

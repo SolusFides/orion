@@ -1,0 +1,44 @@
+@inherits LayoutComponentBase
+@inject NavigationManager Navigation
+@inject SmartDisplay.ControlPanelClient.Services.Auth.AuthState AuthState
+@inject SmartDisplay.ControlPanelClient.Services.Auth.ITokenStorageService TokenStorage
+
+@if (IsAuthPage)
+{
+    <main class="auth-layout">
+        @Body
+    </main>
+}
+else
+{
+    <div class="admin-layout">
+        <NavMenu />
+
+        <main class="admin-content">
+            @Body
+        </main>
+    </div>
+}
+
+@code {
+    private bool IsAuthPage
+    {
+        get
+        {
+            var path = Navigation.ToBaseRelativePath(Navigation.Uri).Trim('/');
+            return path.StartsWith("login", StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.IsAuthenticated)
+        {
+            var savedSession = await TokenStorage.LoadSessionAsync();
+            if (savedSession is not null)
+            {
+                AuthState.RestoreSession(savedSession);
+            }
+        }
+    }
+}
