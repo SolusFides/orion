@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.schemas.screen import ScreenCreate, ScreenResponse, ScreenAssignRequest
 from app.repositories.screen import ScreenRepository
 from app.dependencies import AdminDep
+from app.services.sse_manager import sse_manager
 
 router = APIRouter(prefix="/api/screens", tags=["Screens"])
 screen_repo = ScreenRepository()
@@ -30,5 +31,12 @@ async def update_screen(screen_id: str, screen: ScreenCreate, current_user: Admi
 
 @router.post("/assign")
 async def assign_template(assign_data: ScreenAssignRequest, current_user: AdminDep):
-    # TODO: In future, verify if template_id actually exists in DB
-    return await screen_repo.assign_template(assign_data)
+    result = await screen_repo.assign_template(assign_data)
+    
+    await sse_manager.notify_multiple(
+        screen_ids=assign_data.screen_ids,
+        event_type="template_update",
+        data={"template_id": assign_data.template_id}
+    )
+    
+    return result

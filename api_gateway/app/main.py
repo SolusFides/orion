@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import auth, screens, templates, emergency
+from app.routers import auth, screens, templates, emergency, ujin, client
 
 app = FastAPI(
     title="Orion API Gateway",
@@ -20,6 +20,8 @@ app.include_router(auth.router)
 app.include_router(screens.router)
 app.include_router(templates.router)
 app.include_router(emergency.router)
+app.include_router(ujin.router)
+app.include_router(client.router)
 
 @app.get("/health")
 async def health_check():

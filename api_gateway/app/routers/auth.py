@@ -12,10 +12,10 @@ router = APIRouter(prefix="/api/auth", tags=["Auth"])
 user_repo = UserRepository()
 
 @router.post("/login", response_model=LoginResponse)
-async def login(credentials: LoginRequest):
-    user = await user_repo.get_by_username(credentials.username)
+async def login(login_data: LoginRequest = Depends(LoginRequest.as_form)):
+    user = await user_repo.get_by_username(login_data.username)
     
-    if not user or not bcrypt.checkpw(credentials.password.encode("utf-8"), user.password_hash.encode("utf-8")):
+    if not user or not bcrypt.checkpw(login_data.password.encode("utf-8"), user.password_hash.encode("utf-8")):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",

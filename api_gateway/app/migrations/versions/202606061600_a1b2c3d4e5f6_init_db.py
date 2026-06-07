@@ -61,7 +61,7 @@ def upgrade() -> None:
 
     # 5. Seed default admin user (username: admin, password: admin123)
     # Bcrypt hash for 'admin123'
-    default_admin_hash = "$2b$12$R9h/lIPzNgbpcG8tM1tuOuqpH7O.nSpfWPHF737JCHd5B.Wq5Dkfe"
+    default_admin_hash = "$2b$12$8Ubp6s3FpT95sPcc42jHF.nSLraASAkXXicFJtlgiU7xqOtzDL3Ju"
     
     op.bulk_insert(
         users_table,
