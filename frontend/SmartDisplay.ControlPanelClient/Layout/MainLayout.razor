@@ -1,5 +1,7 @@
 @inherits LayoutComponentBase
 @inject NavigationManager Navigation
+@inject SmartDisplay.ControlPanelClient.Services.Auth.AuthState AuthState
+@inject SmartDisplay.ControlPanelClient.Services.Auth.ITokenStorageService TokenStorage
 
 @if (IsAuthPage)
 {
@@ -10,17 +12,11 @@
 else
 {
     <div class="admin-layout">
-        <aside class="admin-sidebar">
-            <NavMenu />
-        </aside>
+        <NavMenu />
 
-        <section class="admin-workspace">
-            <AdminHeader />
-
-            <main class="admin-content">
-                @Body
-            </main>
-        </section>
+        <main class="admin-content">
+            @Body
+        </main>
     </div>
 }
 
@@ -31,6 +27,18 @@ else
         {
             var path = Navigation.ToBaseRelativePath(Navigation.Uri).Trim('/');
             return path.StartsWith("login", StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.IsAuthenticated)
+        {
+            var savedSession = await TokenStorage.LoadSessionAsync();
+            if (savedSession is not null)
+            {
+                AuthState.RestoreSession(savedSession);
+            }
         }
     }
 }

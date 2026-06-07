@@ -1,0 +1,51 @@
+@using SmartDisplay.Shared.Models.Templates
+@using SmartDisplay.Shared.Models.Ujin
+@using SmartDisplay.ScreenClient.Services
+@inject HttpClient Http
+
+<article class="screen-widget metric-widget">
+    <header class="widget-header">
+        <span>Парковка</span>
+        <strong>@Widget.DisplayTitle</strong>
+    </header>
+
+    <div class="metric-value">@parking.TotalFree</div>
+    <p>свободных мест</p>
+
+    @if (parking.Zones.Count > 0)
+    {
+        <div class="metric-details">
+            @foreach (var zone in parking.Zones.Take(3))
+            {
+                <span>@zone.Name — @zone.FreeCount</span>
+            }
+        </div>
+    }
+</article>
+
+@code {
+    [Parameter, EditorRequired] public TemplateWidgetDto Widget { get; set; } = new();
+
+    private ParkingFreeResponse parking = ScreenFallbackData.CreateParking();
+
+    private int ComplexId => Widget.Settings.TryGetValue("complex_id", out var complexValue) && int.TryParse(complexValue, out var complexId)
+        ? complexId
+        : 73;
+
+    private int BuildingId => Widget.Settings.TryGetValue("building_id", out var value) && int.TryParse(value, out var result)
+        ? result
+        : 141;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            var content = await Http.GetStringAsync($"api/ujin/parking/free?complex_id={ComplexId}&building_id={BuildingId}");
+            parking = UjinApiParser.ParseParking(content);
+        }
+        catch
+        {
+            parking = ScreenFallbackData.CreateParking();
+        }
+    }
+}

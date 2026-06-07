@@ -27,35 +27,51 @@ else
     <AppPageHeader
         Kicker="Главная"
         Title="Панель управления УК"
-        Subtitle="Сводка по подключенным экранам, шаблонам и режиму чрезвычайных ситуаций.">
+        Subtitle="Сводка по экранам, шаблонам и режиму чрезвычайных ситуаций.">
         <button type="button" class="primary-action" @onclick="CreateTemplate">Создать шаблон</button>
     </AppPageHeader>
 
-    <section class="stats-grid">
-        <DashboardStatCard Label="Всего экранов" Value="@summary.ScreensTotal.ToString()" Hint="Подключенные панели в холлах, лифтах и на ресепшн." Icon="▣" Variant="blue" />
-        <DashboardStatCard Label="С шаблоном" Value="@summary.ScreensWithTemplate.ToString()" Hint="Экраны, на которые уже назначен шаблон." Icon="✓" Variant="green" />
-        <DashboardStatCard Label="Шаблоны" Value="@summary.TemplatesTotal.ToString()" Hint="Сохраненные варианты сетки и виджетов." Icon="▦" Variant="violet" />
-        <DashboardStatCard Label="Активные ЧС" Value="@summary.ActiveEmergenciesTotal.ToString()" Hint="Сообщения, которые сейчас отображаются поверх контента." Icon="!" Variant="red" />
+    <section class="stats-grid" aria-label="Основные показатели">
+        <DashboardStatCard
+            Label="Всего экранов"
+            Value="@summary.ScreensTotal.ToString()"
+            Hint="Открыть список экранов с группировкой по домам и подъездам."
+            Icon="▣"
+            Variant="blue"
+            Url="/screens" />
+
+        <DashboardStatCard
+            Label="С шаблоном"
+            Value="@summary.ScreensWithTemplate.ToString()"
+            Hint="Посмотреть экраны, на которые уже назначен шаблон."
+            Icon="✓"
+            Variant="green"
+            Url="/screens?view=assigned" />
+
+        <DashboardStatCard
+            Label="Шаблоны"
+            Value="@summary.TemplatesTotal.ToString()"
+            Hint="Перейти к списку шаблонов и настройке виджетов."
+            Icon="▦"
+            Variant="violet"
+            Url="/templates" />
+
+        <DashboardStatCard
+            Label="Активные ЧС"
+            Value="@summary.ActiveEmergenciesTotal.ToString()"
+            Hint="Открыть управление экстренными сообщениями."
+            Icon="!"
+            Variant="red"
+            Url="/emergency" />
     </section>
 
     <section class="dashboard-sections">
-        <div>
-            <h2>Быстрые действия</h2>
-            <div class="quick-grid">
-                @foreach (var action in quickActions)
-                {
-                    <DashboardQuickActionCard Title="@action.Title" Description="@action.Description" Url="@action.Url" />
-                }
-            </div>
-        </div>
-
         <DashboardRecentEventList Events="recentEvents" />
     </section>
 }
 
 @code {
     private DashboardSummaryDto? summary;
-    private List<DashboardQuickActionDto> quickActions = new();
     private List<DashboardRecentEventDto> recentEvents = new();
 
     protected override async Task OnInitializedAsync()
@@ -66,7 +82,6 @@ else
         }
 
         summary = await DashboardService.GetSummaryAsync();
-        quickActions = await DashboardService.GetQuickActionsAsync();
         recentEvents = await DashboardService.GetRecentEventsAsync();
     }
 

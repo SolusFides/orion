@@ -21,7 +21,7 @@ else
     <AppPageHeader
         Kicker="ЧС"
         Title="Режим чрезвычайной ситуации"
-        Subtitle="ЧС накладывается поверх любого шаблона и отправляется адресно: на экран, группу экранов или все дисплеи." />
+        Subtitle="ЧС накладывается поверх любого шаблона и отправляется адресно: на экран, подъезд, дом или все дисплеи." />
 
     <div class="emergency-grid">
         <section class="emergency-form">
@@ -32,12 +32,20 @@ else
 
             <div class="field-row">
                 <div class="field">
-                    <label>Цель</label>
-                    <select @bind="selectedScreenId">
+                    <label>Цель отправки</label>
+                    <select @bind="selectedTarget">
                         <option value="all">Все экраны</option>
+                        @foreach (var building in BuildingGroups)
+                        {
+                            <option value="building:@building.BuildingId">Дом @building.BuildingId (@building.Count экранов)</option>
+                        }
+                        @foreach (var entrance in EntranceGroups)
+                        {
+                            <option value="entrance:@entrance.BuildingId:@entrance.Entrance">Дом @entrance.BuildingId, подъезд @entrance.Entrance (@entrance.Count экранов)</option>
+                        }
                         @foreach (var screen in screens)
                         {
-                            <option value="@screen.Id">@screen.Name</option>
+                            <option value="screen:@screen.Id">@screen.Name</option>
                         }
                     </select>
                 </div>
@@ -48,10 +56,14 @@ else
                 </div>
             </div>
 
+            <div class="target-summary">
+                Получателей: <strong>@ResolveSelectedTarget().Count</strong>
+            </div>
+
             <EmergencyBannerPreview Text="@text" IsDoubleHeight="@(text.Length > 80)" />
 
             <div class="emergency-actions">
-                <button type="button" class="danger" @onclick="ActivateAsync">Активировать ЧС</button>
+                <button type="button" class="danger" @onclick="ActivateAsync" disabled="@string.IsNullOrWhiteSpace(text)">Активировать ЧС</button>
                 <button type="button" class="secondary" @onclick="ResetAsync">Сбросить ЧС</button>
             </div>
         </section>
@@ -69,7 +81,7 @@ else
                     {
                         <article class="emergency-item">
                             <strong>@item.Text</strong>
-                            <span>@string.Join(", ", item.TargetScreens) · @item.CreatedAt.ToString("dd.MM HH:mm")</span>
+                            <span>@FormatTargets(item.TargetScreens) · @item.CreatedAt.ToString("dd.MM HH:mm")</span>
                         </article>
                     }
                 }
@@ -77,11 +89,11 @@ else
 
             <div class="panel-card">
                 <h2>Журнал действий</h2>
-                @foreach (var item in log.Take(5))
+                @foreach (var item in log.Take(6))
                 {
                     <article class="log-item">
-                        <strong>@item.Action</strong>
-                        <span>@item.UserId · @item.CreatedAt.ToString("dd.MM HH:mm")</span>
+                        <strong>@FormatAction(item.Action)</strong>
+                        <span>@item.UserId · @FormatTargets(item.TargetScreens) · @item.CreatedAt.ToString("dd.MM HH:mm")</span>
                     </article>
                 }
             </div>
@@ -94,8 +106,19 @@ else
     private List<EmergencyActiveDto> activeEmergencies = new();
     private List<EmergencyLogDto> log = new();
     private string text = "ВНИМАНИЕ!!! Проверка системы экстренного оповещения.";
-    private string selectedScreenId = "all";
+    private string selectedTarget = "all";
     private int timeoutMinutes = 30;
+
+    private IEnumerable<(int BuildingId, int Count)> BuildingGroups => screens
+        .GroupBy(screen => screen.BuildingId)
+        .OrderBy(group => group.Key)
+        .Select(group => (group.Key, group.Count()));
+
+    private IEnumerable<(int BuildingId, int Entrance, int Count)> EntranceGroups => screens
+        .GroupBy(screen => new { screen.BuildingId, screen.Entrance })
+        .OrderBy(group => group.Key.BuildingId)
+        .ThenBy(group => group.Key.Entrance)
+        .Select(group => (group.Key.BuildingId, group.Key.Entrance, group.Count()));
 
     protected override async Task OnInitializedAsync()
     {
@@ -116,10 +139,17 @@ else
 
     private async Task ActivateAsync()
     {
+        var targetScreenIds = ResolveSelectedTarget();
+
+        if (targetScreenIds.Count == 0 || string.IsNullOrWhiteSpace(text))
+        {
+            return;
+        }
+
         await EmergencyService.ActivateAsync(new EmergencyActivateRequest
         {
-            Text = text,
-            ScreenIds = new List<string> { selectedScreenId },
+            Text = text.Trim(),
+            ScreenIds = targetScreenIds,
             Priority = 1,
             TimeoutMinutes = timeoutMinutes
         });
@@ -129,11 +159,64 @@ else
 
     private async Task ResetAsync()
     {
+        var targetScreenIds = ResolveSelectedTarget();
+
+        if (targetScreenIds.Count == 0)
+        {
+            return;
+        }
+
         await EmergencyService.ResetAsync(new EmergencyResetRequest
         {
-            ScreenIds = new List<string> { selectedScreenId }
+            ScreenIds = targetScreenIds
         });
 
         await LoadEmergencyAsync();
+    }
+
+    private List<string> ResolveSelectedTarget()
+    {
+        if (selectedTarget == "all")
+        {
+            return new List<string> { "all" };
+        }
+
+        if (selectedTarget.StartsWith("screen:", StringComparison.OrdinalIgnoreCase))
+        {
+            return new List<string> { selectedTarget.Replace("screen:", string.Empty, StringComparison.OrdinalIgnoreCase) };
+        }
+
+        if (selectedTarget.StartsWith("building:", StringComparison.OrdinalIgnoreCase))
+        {
+            var value = selectedTarget.Replace("building:", string.Empty, StringComparison.OrdinalIgnoreCase);
+            return int.TryParse(value, out var buildingId)
+                ? screens.Where(screen => screen.BuildingId == buildingId).Select(screen => screen.Id).ToList()
+                : new List<string>();
+        }
+
+        if (selectedTarget.StartsWith("entrance:", StringComparison.OrdinalIgnoreCase))
+        {
+            var parts = selectedTarget.Split(':');
+            if (parts.Length == 3 && int.TryParse(parts[1], out var buildingId) && int.TryParse(parts[2], out var entrance))
+            {
+                return screens
+                    .Where(screen => screen.BuildingId == buildingId && screen.Entrance == entrance)
+                    .Select(screen => screen.Id)
+                    .ToList();
+            }
+        }
+
+        return new List<string>();
+    }
+
+    private static string FormatTargets(IEnumerable<string> targetScreens)
+    {
+        var targets = targetScreens.ToList();
+        return targets.Contains("all", StringComparer.OrdinalIgnoreCase) ? "все экраны" : string.Join(", ", targets);
+    }
+
+    private static string FormatAction(string action)
+    {
+        return action.Equals("activate", StringComparison.OrdinalIgnoreCase) ? "Активация" : "Сброс";
     }
 }

@@ -28,8 +28,14 @@
         <span>Текущий шаблон</span>
         <strong>@(Screen.CurrentTemplateId ?? "Не назначен")</strong>
     </div>
+
+    <a class="screen-client-link" href="@ClientUrl" target="_blank" rel="noreferrer">
+        Открыть клиент экрана
+    </a>
 </article>
 
 @code {
     [Parameter, EditorRequired] public ScreenDto Screen { get; set; } = new();
+
+    private string ClientUrl => $"http://localhost:27762/screen/{Uri.EscapeDataString(Screen.Id)}";
 }

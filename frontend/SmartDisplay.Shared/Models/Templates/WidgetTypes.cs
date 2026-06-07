@@ -42,20 +42,25 @@ public static class WidgetTypes
         {
             News => new Dictionary<string, string>
             {
+                ["complex_id"] = "73",
                 ["building_id"] = "141",
-                ["limit"] = "3"
+                ["limit"] = "3",
+                ["show_text"] = "true"
             },
             Parking => new Dictionary<string, string>
             {
+                ["complex_id"] = "73",
                 ["building_id"] = "141"
             },
             Storage => new Dictionary<string, string>
             {
+                ["complex_id"] = "73",
                 ["building_id"] = "141"
             },
             StaticText => new Dictionary<string, string>
             {
-                ["text"] = "Информация для жителей ЖК"
+                ["text"] = "Информация для жителей ЖК",
+                ["subtitle"] = "Актуальные сведения управляющей компании"
             },
             Weather => new Dictionary<string, string>
             {

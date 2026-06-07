@@ -1,5 +1,6 @@
 @page "/templates/{TemplateId}/preview"
 
+@using System
 @using SmartDisplay.Shared.Models.Templates
 @using SmartDisplay.ControlPanelClient.Services.Auth
 @using SmartDisplay.ControlPanelClient.Services.Templates
@@ -22,17 +23,36 @@ else
 {
     <AppPageHeader
         Kicker="Предпросмотр"
-        Title="Конфигурация шаблона"
-        Subtitle="Состав виджетов, тема и сетка, которые передаются клиенту дисплея.">
-        <button type="button" class="page-button" @onclick="Back">Назад</button>
+        Title="Предпросмотр шаблона"
+        Subtitle="Визуальная проверка через клиент экрана в формате 9:16. Интерактивные элементы дисплея не используются.">
+        <div class="preview-actions">
+            <a class="page-button" href="@ClientPreviewUrl" target="_blank" rel="noreferrer">Открыть в отдельном окне</a>
+            <button type="button" class="page-button secondary" @onclick="Back">Назад</button>
+        </div>
     </AppPageHeader>
 
-    <TemplateStructureSummary Template="template" />
+    <section class="preview-layout">
+        <div class="preview-frame-shell">
+            <div class="preview-frame">
+                <iframe src="@ClientPreviewUrl" title="Предпросмотр шаблона @template.Name"></iframe>
+            </div>
+            <p>
+                Если область предпросмотра пустая, запустите проект <strong>SmartDisplay.ScreenClient</strong>
+                и откройте предпросмотр в отдельном окне.
+            </p>
+        </div>
+
+        <aside class="preview-info">
+            <TemplateStructureSummary Template="template" />
+        </aside>
+    </section>
 }
 
 @code {
     [Parameter] public string TemplateId { get; set; } = string.Empty;
     private TemplateDto? template;
+
+    private string ClientPreviewUrl => $"http://localhost:27762/preview/template/{Uri.EscapeDataString(TemplateId)}";
 
     protected override async Task OnInitializedAsync()
     {

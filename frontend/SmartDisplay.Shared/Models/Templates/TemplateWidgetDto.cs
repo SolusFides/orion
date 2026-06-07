@@ -19,6 +19,12 @@ public class TemplateWidgetDto
     [JsonPropertyName("size")]
     public string Size { get; set; } = WidgetSizes.Normal;
 
+    [JsonPropertyName("col_span")]
+    public int ColSpan { get; set; }
+
+    [JsonPropertyName("row_span")]
+    public int RowSpan { get; set; }
+
     [JsonPropertyName("settings")]
     public Dictionary<string, string> Settings { get; set; } = new();
 
@@ -27,8 +33,10 @@ public class TemplateWidgetDto
         ? WidgetTypes.GetDisplayName(Type)
         : Title;
 
-    public static TemplateWidgetDto Create(string type, int order)
+    public static TemplateWidgetDto Create(string type, int order, int columns = 4)
     {
+        var span = WidgetSizes.GetDefaultSpan(WidgetSizes.Normal, columns);
+
         return new TemplateWidgetDto
         {
             Id = $"widget-{type}-{Guid.NewGuid():N}",
@@ -36,21 +44,36 @@ public class TemplateWidgetDto
             Title = WidgetTypes.GetDisplayName(type),
             Order = order,
             Size = WidgetSizes.Normal,
+            ColSpan = span.ColSpan,
+            RowSpan = span.RowSpan,
             Settings = WidgetTypes.CreateDefaultSettings(type)
         };
     }
 
-    public TemplateWidgetDto CloneNormalized()
+    public TemplateWidgetDto CloneNormalized(int columns = 4)
     {
+        var safeType = string.IsNullOrWhiteSpace(Type) ? WidgetTypes.StaticText : Type;
+        var safeSize = string.IsNullOrWhiteSpace(Size) ? WidgetSizes.Normal : Size;
+        var defaultSpan = WidgetSizes.GetDefaultSpan(safeSize, columns);
+
         return new TemplateWidgetDto
         {
-            Id = string.IsNullOrWhiteSpace(Id) ? $"widget-{Type}-{Guid.NewGuid():N}" : Id,
-            Type = string.IsNullOrWhiteSpace(Type) ? WidgetTypes.StaticText : Type,
-            Title = string.IsNullOrWhiteSpace(Title) ? WidgetTypes.GetDisplayName(Type) : Title,
+            Id = string.IsNullOrWhiteSpace(Id) ? $"widget-{safeType}-{Guid.NewGuid():N}" : Id,
+            Type = safeType,
+            Title = string.IsNullOrWhiteSpace(Title) ? WidgetTypes.GetDisplayName(safeType) : Title,
             Order = Order <= 0 ? 1 : Order,
-            Size = string.IsNullOrWhiteSpace(Size) ? WidgetSizes.Normal : Size,
+            Size = safeSize,
+            ColSpan = ColSpan <= 0 ? defaultSpan.ColSpan : Math.Clamp(ColSpan, 1, Math.Max(columns, 1)),
+            RowSpan = RowSpan <= 0 ? defaultSpan.RowSpan : Math.Clamp(RowSpan, 1, 6),
             Settings = new Dictionary<string, string>(Settings)
         };
+    }
+
+    public void ApplySizePreset(int columns)
+    {
+        var span = WidgetSizes.GetDefaultSpan(Size, columns);
+        ColSpan = span.ColSpan;
+        RowSpan = span.RowSpan;
     }
 
     public override string ToString()

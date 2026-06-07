@@ -6,13 +6,13 @@ using SmartDisplay.ControlPanelClient.Services.Templates;
 
 namespace SmartDisplay.ControlPanelClient.Services.Dashboard;
 
-public class LocalDashboardService : IDashboardService
+public class ApiDashboardService : IDashboardService
 {
     private readonly IScreensService _screensService;
     private readonly ITemplatesService _templatesService;
     private readonly IEmergencyService _emergencyService;
 
-    public LocalDashboardService(
+    public ApiDashboardService(
         IScreensService screensService,
         ITemplatesService templatesService,
         IEmergencyService emergencyService)
@@ -43,8 +43,25 @@ public class LocalDashboardService : IDashboardService
         return Task.FromResult(FallbackData.CreateDashboardQuickActions());
     }
 
-    public Task<List<DashboardRecentEventDto>> GetRecentEventsAsync()
+    public async Task<List<DashboardRecentEventDto>> GetRecentEventsAsync()
     {
-        return Task.FromResult(FallbackData.CreateDashboardRecentEvents());
+        var log = await _emergencyService.GetLogAsync();
+
+        if (log.Count == 0)
+        {
+            return FallbackData.CreateDashboardRecentEvents();
+        }
+
+        return log.Take(6)
+            .Select(item => new DashboardRecentEventDto
+            {
+                Title = item.Action.Equals("activate", StringComparison.OrdinalIgnoreCase)
+                    ? "Активирован режим ЧС"
+                    : "Сброшен режим ЧС",
+                Description = string.Join(", ", item.TargetScreens),
+                CreatedAt = item.CreatedAt,
+                Level = item.Action.Equals("activate", StringComparison.OrdinalIgnoreCase) ? "warning" : "info"
+            })
+            .ToList();
     }
 }

@@ -1,9 +1,14 @@
 .screen-card {
-    padding: 22px;
-    border-radius: 24px;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
+    padding: 20px;
+    border-radius: 18px;
+    background: var(--ui-card);
+    border: 1px solid transparent;
+    transition: background .16s ease, transform .16s ease;
+}
+
+.screen-card:hover {
+    background: var(--ui-card-hover);
+    transform: translateY(-1px);
 }
 
 .screen-card-head {
@@ -15,41 +20,42 @@
 
 .screen-card h3 {
     margin: 0;
-    color: #0f172a;
+    color: var(--ui-text);
     font-size: 18px;
     font-weight: 850;
+    letter-spacing: -.03em;
 }
 
 .screen-id {
     margin-top: 6px;
-    color: #64748b;
+    color: var(--ui-muted);
     font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .screen-meta {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin: 20px 0;
+    gap: 8px;
+    margin: 18px 0;
 }
 
 .screen-meta div {
     padding: 12px;
-    border-radius: 16px;
-    background: #f8fafc;
+    border-radius: 14px;
+    background: rgba(255,255,255,.32);
 }
 
 .screen-meta dt {
-    color: #64748b;
-    font-size: 12px;
+    color: var(--ui-muted);
+    font-size: 11px;
     font-weight: 800;
     text-transform: uppercase;
 }
 
 .screen-meta dd {
-    margin: 4px 0 0;
-    color: #0f172a;
+    margin: 5px 0 0;
+    color: var(--ui-text);
     font-size: 18px;
     font-weight: 900;
 }
@@ -57,20 +63,34 @@
 .screen-template {
     display: grid;
     gap: 4px;
-    padding: 14px;
-    border-radius: 16px;
-    background: #eff6ff;
+    padding: 13px 14px;
+    border-radius: 14px;
+    background: rgba(255,255,255,.34);
 }
 
 .screen-template span {
-    color: #2563eb;
-    font-size: 12px;
-    font-weight: 850;
+    color: var(--ui-muted);
+    font-size: 11px;
+    font-weight: 800;
     text-transform: uppercase;
 }
 
 .screen-template strong {
-    color: #1e3a8a;
+    color: var(--ui-text);
     font-size: 13px;
     word-break: break-word;
+}
+
+.screen-client-link {
+    display: inline-flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 12px;
+    padding: 11px 14px;
+    border-radius: 999px;
+    color: #fff;
+    background: #111;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 760;
 }

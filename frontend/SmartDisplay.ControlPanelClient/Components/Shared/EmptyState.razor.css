@@ -1,33 +1,37 @@
 .empty-state {
-    padding: 34px;
-    border: 1px dashed #cbd5e1;
-    border-radius: 24px;
-    background: #ffffff;
+    min-height: 280px;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 12px;
+    padding: 40px;
+    border-radius: 18px;
+    background: var(--ui-card);
     text-align: center;
 }
 
 .empty-icon {
-    width: 54px;
-    height: 54px;
-    margin: 0 auto 14px;
+    width: 68px;
+    height: 68px;
     display: grid;
     place-items: center;
-    border-radius: 18px;
-    color: #2563eb;
-    background: #dbeafe;
-    font-size: 24px;
-    font-weight: 900;
+    border-radius: 50%;
+    background: #797a77;
+    color: transparent;
+    font-size: 0;
 }
 
 .empty-state h2 {
-    margin: 0 0 8px;
-    color: #0f172a;
-    font-size: 20px;
+    margin: 0;
+    color: var(--ui-text);
+    font-size: 24px;
+    font-weight: 850;
+    letter-spacing: -.03em;
 }
 
 .empty-state p {
-    max-width: 520px;
-    margin: 0 auto;
-    color: #64748b;
-    line-height: 1.55;
+    max-width: 460px;
+    margin: 0;
+    color: var(--ui-muted);
+    line-height: 1.45;
 }

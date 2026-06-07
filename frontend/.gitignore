@@ -19,7 +19,3 @@ obj/
 *.zip
 *.tmp
 *.log
-
-# Visual Studio local launch profiles
-*.slnLaunch.user
-*.slnx.user

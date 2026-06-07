@@ -1,9 +1,17 @@
 .template-card {
-    padding: 22px;
-    border-radius: 24px;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
+    min-height: 238px;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    border-radius: 18px;
+    background: var(--ui-card);
+    border: 1px solid transparent;
+    transition: background .16s ease, transform .16s ease;
+}
+
+.template-card:hover {
+    background: var(--ui-card-hover);
+    transform: translateY(-1px);
 }
 
 .template-head {
@@ -15,35 +23,36 @@
 
 .template-head h3 {
     margin: 0;
-    color: #0f172a;
+    color: var(--ui-text);
     font-size: 18px;
     font-weight: 850;
+    letter-spacing: -.03em;
 }
 
 .template-id {
     margin-top: 6px;
-    color: #64748b;
+    color: var(--ui-muted);
     font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .template-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    margin: 20px 0;
+    gap: 8px;
+    margin: 18px 0;
 }
 
 .template-grid div {
     padding: 12px;
-    border-radius: 16px;
-    background: #f8fafc;
+    border-radius: 14px;
+    background: rgba(255,255,255,.32);
 }
 
 .template-grid span {
     display: block;
-    color: #64748b;
-    font-size: 12px;
+    color: var(--ui-muted);
+    font-size: 11px;
     font-weight: 800;
     text-transform: uppercase;
 }
@@ -51,42 +60,51 @@
 .template-grid strong {
     display: block;
     margin-top: 5px;
-    color: #0f172a;
-    font-size: 18px;
+    color: var(--ui-text);
+    font-size: 17px;
+    font-weight: 880;
 }
 
 .widget-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 7px;
     margin-bottom: 18px;
 }
 
 .widget-tags span {
-    padding: 7px 10px;
+    padding: 6px 9px;
     border-radius: 999px;
-    color: #1d4ed8;
-    background: #dbeafe;
-    font-size: 12px;
-    font-weight: 800;
+    color: #111;
+    background: rgba(255,255,255,.45);
+    border: 1px solid rgba(17,17,17,.08);
+    font-size: 11px;
+    font-weight: 740;
 }
 
 .template-actions {
     display: flex;
-    gap: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: auto;
 }
 
 .template-actions button {
-    padding: 10px 12px;
-    border: 0;
-    border-radius: 12px;
-    color: #ffffff;
-    background: #2563eb;
-    font-weight: 800;
-    cursor: pointer;
+    min-height: 38px;
+    padding: 0 14px;
+    border-radius: 999px;
+    color: #fff;
+    background: #111;
+    font-size: 12px;
+    font-weight: 780;
 }
 
 .template-actions .secondary {
-    color: #334155;
-    background: #f1f5f9;
+    color: #111;
+    background: rgba(255,255,255,.48);
+}
+
+.template-actions .danger {
+    color: #111;
+    background: var(--ui-red);
 }

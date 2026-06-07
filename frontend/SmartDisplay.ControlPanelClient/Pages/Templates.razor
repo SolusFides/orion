@@ -19,9 +19,14 @@ else
     <AppPageHeader
         Kicker="Шаблоны"
         Title="Шаблоны дисплеев"
-        Subtitle="Управление сетками, темами и наборами виджетов для дисплеев.">
+        Subtitle="Создание, редактирование, предпросмотр и удаление шаблонов с наборами виджетов.">
         <button type="button" class="page-button" @onclick="CreateTemplate">Создать шаблон</button>
     </AppPageHeader>
+
+    @if (!string.IsNullOrWhiteSpace(statusMessage))
+    {
+        <div class="templates-status">@statusMessage</div>
+    }
 
     @if (templates.Count == 0)
     {
@@ -32,7 +37,7 @@ else
         <section class="templates-grid">
             @foreach (var template in templates)
             {
-                <TemplateCard Template="template" />
+                <TemplateCard Template="template" OnDeleteRequested="DeleteTemplateAsync" />
             }
         </section>
     }
@@ -40,6 +45,7 @@ else
 
 @code {
     private List<TemplateDto> templates = new();
+    private string statusMessage = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -48,7 +54,22 @@ else
             return;
         }
 
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
         templates = await TemplatesService.GetTemplatesAsync();
+    }
+
+    private async Task DeleteTemplateAsync(string templateId)
+    {
+        var response = await TemplatesService.DeleteTemplateAsync(templateId);
+        statusMessage = response.Status.Equals("success", StringComparison.OrdinalIgnoreCase)
+            ? "Шаблон удалён."
+            : "Не удалось удалить шаблон.";
+
+        await LoadAsync();
     }
 
     private void CreateTemplate() => Navigation.NavigateTo("/templates/create");

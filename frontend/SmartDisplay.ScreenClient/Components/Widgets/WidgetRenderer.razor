@@ -1,0 +1,33 @@
+@using SmartDisplay.Shared.Models.Templates
+
+@switch (Widget.Type)
+{
+    case WidgetTypes.News:
+        <NewsWidget Widget="Widget" />
+        break;
+    case WidgetTypes.Parking:
+        <ParkingWidget Widget="Widget" />
+        break;
+    case WidgetTypes.Storage:
+        <StorageWidget Widget="Widget" />
+        break;
+    case WidgetTypes.StaticText:
+        <StaticTextWidget Widget="Widget" />
+        break;
+    case WidgetTypes.Weather:
+        <SimpleValueWidget Widget="Widget" Value="+18°" Caption="Облачно, без осадков" Kicker="Погода" />
+        break;
+    case WidgetTypes.Rss:
+        <StaticTextWidget Widget="Widget" Kicker="RSS" />
+        break;
+    case WidgetTypes.Camera:
+        <SimpleValueWidget Widget="Widget" Value="LIVE" Caption="Камера двора" Kicker="Камера" />
+        break;
+    default:
+        <StaticTextWidget Widget="Widget" />
+        break;
+}
+
+@code {
+    [Parameter, EditorRequired] public TemplateWidgetDto Widget { get; set; } = new();
+}

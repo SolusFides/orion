@@ -5,42 +5,39 @@
 
 @inject IAuthService AuthService
 @inject AuthState AuthState
+@inject ITokenStorageService TokenStorage
 @inject NavigationManager Navigation
 
-<PageTitle>Вход | Умный дисплей ЖК</PageTitle>
+<PageTitle>Smart display | Login</PageTitle>
 
-<div class="login-page">
-    <section class="login-card">
-        <div class="login-brand">
-            <div class="login-logo">ЖК</div>
-            <div>
-                <h1>Умный дисплей ЖК</h1>
-                <p>Панель управления УК</p>
+<main class="login-page">
+    <div class="login-shade" aria-hidden="true"></div>
+
+    <section class="login-panel" aria-label="Форма авторизации Smart display">
+        <div class="login-brand" aria-label="Ujin Smart display">
+            <div class="ujin-logo" aria-hidden="true">
+                <span class="ujin-mark">U</span>
+                <span class="ujin-text">ujin</span>
             </div>
+            <div class="smart-display-title">Smart display</div>
         </div>
 
         <div class="login-form">
-            <div class="form-field">
-                <label for="username">Логин</label>
-                <input id="username"
-                       class="form-input"
-                       autocomplete="username"
-                       placeholder="admin"
-                       @bind="loginModel.Username"
-                       @bind:event="oninput" />
-            </div>
+            <input class="login-input"
+                   aria-label="Username"
+                   autocomplete="username"
+                   placeholder="Username"
+                   @bind="loginModel.Username"
+                   @bind:event="oninput" />
 
-            <div class="form-field">
-                <label for="password">Пароль</label>
-                <input id="password"
-                       class="form-input"
-                       type="password"
-                       autocomplete="current-password"
-                       placeholder="secret"
-                       @bind="loginModel.Password"
-                       @bind:event="oninput"
-                       @onkeydown="HandlePasswordKeyDown" />
-            </div>
+            <input class="login-input"
+                   aria-label="Password"
+                   type="password"
+                   autocomplete="current-password"
+                   placeholder="Password"
+                   @bind="loginModel.Password"
+                   @bind:event="oninput"
+                   @onkeydown="HandlePasswordKeyDown" />
 
             @if (!string.IsNullOrWhiteSpace(errorMessage))
             {
@@ -48,23 +45,35 @@
             }
 
             <button class="login-button" type="button" disabled="@isLoading" @onclick="LoginAsync">
-                @(isLoading ? "Входим..." : "Войти")
+                @(isLoading ? "Loading..." : "Log in")
             </button>
-        </div>
 
-        <div class="login-demo">
-            Тестовые данные: <b>admin</b> / <b>secret</b>
+            <a class="contact-link" href="mailto:support@ujin.tech">Contact us</a>
         </div>
     </section>
-</div>
+
+    <div class="login-caption">
+        Цифровые решения для умных<br />
+        зданий и домов
+    </div>
+</main>
 
 @code {
     private readonly LoginRequest loginModel = new();
     private bool isLoading;
     private string errorMessage = string.Empty;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        if (!AuthState.IsAuthenticated)
+        {
+            var savedSession = await TokenStorage.LoadSessionAsync();
+            if (savedSession is not null)
+            {
+                AuthState.RestoreSession(savedSession);
+            }
+        }
+
         if (AuthState.IsAuthenticated)
         {
             Navigation.NavigateTo("/dashboard");
@@ -82,7 +91,7 @@
 
         if (string.IsNullOrWhiteSpace(loginModel.Username) || string.IsNullOrWhiteSpace(loginModel.Password))
         {
-            errorMessage = "Введите логин и пароль.";
+            errorMessage = "Enter username and password.";
             return;
         }
 
@@ -94,7 +103,7 @@
 
             if (!response.HasAccessToken)
             {
-                errorMessage = "Неверный логин или пароль.";
+                errorMessage = "Invalid username or password.";
                 return;
             }
 

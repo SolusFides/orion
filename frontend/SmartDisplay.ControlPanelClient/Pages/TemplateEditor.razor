@@ -1,9 +1,9 @@
 @page "/templates/create"
 @page "/templates/{TemplateId}/edit"
 
-@using SmartDisplay.Shared.Models.Templates
 @using SmartDisplay.ControlPanelClient.Services.Auth
 @using SmartDisplay.ControlPanelClient.Services.Templates
+@using SmartDisplay.Shared.Models.Templates
 
 @inject AuthState AuthState
 @inject ITemplatesService TemplatesService
@@ -20,61 +20,105 @@ else
     <AppPageHeader
         Kicker="Редактор"
         Title="@PageTitleText"
-        Subtitle="Настройте структуру, тему и набор виджетов для отображения на дисплеях." />
+        Subtitle="Выберите нужные виджеты. Раскладка на экране фиксированная и соответствует формату 9:16." />
 
-    <div class="editor-grid">
-        <section class="editor-form">
+    <div class="template-editor-grid">
+        <section class="editor-panel">
             <div class="field">
                 <label>Название шаблона</label>
-                <input @bind="templateName" @bind:event="oninput" placeholder="Например: Утренняя сетка" />
+                <input @bind="templateName" @bind:event="oninput" placeholder="Например: Информационный экран" />
             </div>
 
-            <div class="field-row">
-                <div class="field">
-                    <label>Сетка</label>
-                    <select @bind="layout">
-                        @foreach (var item in TemplateLayouts.All)
-                        {
-                            <option value="@item">@TemplateLayouts.GetDisplayName(item)</option>
-                        }
-                    </select>
-                </div>
+            <div class="field">
+                <label>Тема экрана</label>
+                <select @bind="theme">
+                    @foreach (var item in TemplateThemes.All)
+                    {
+                        <option value="@item">@TemplateThemes.GetDisplayName(item)</option>
+                    }
+                </select>
+            </div>
 
-                <div class="field">
-                    <label>Тема</label>
-                    <select @bind="theme">
-                        @foreach (var item in TemplateThemes.All)
-                        {
-                            <option value="@item">@TemplateThemes.GetDisplayName(item)</option>
-                        }
-                    </select>
+            <div class="section-title">
+                <div>
+                    <h2>Доступные виджеты</h2>
+                    <p>Добавьте блоки, которые должны отображаться на клиентском экране.</p>
                 </div>
             </div>
 
-            <div class="widgets-picker">
-                <h2>Виджеты</h2>
-                @foreach (var type in WidgetTypes.All)
+            <div class="widget-catalog">
+                @foreach (var widgetType in AvailableWidgets)
                 {
-                    <label class="widget-option">
-                        <input type="checkbox" checked="@selectedWidgets.Contains(type)" @onchange="args => ToggleWidget(type, args)" />
-                        <span>
-                            <strong>@WidgetTypes.GetDisplayName(type)</strong>
-                            <small>@GetWidgetDescription(type)</small>
-                        </span>
-                    </label>
+                    <button type="button" class="catalog-card" @onclick="() => AddWidget(widgetType)">
+                        <span>@WidgetTypes.GetDisplayName(widgetType)</span>
+                        <small>@GetWidgetDescription(widgetType)</small>
+                    </button>
                 }
             </div>
 
+            <div class="section-title selected-title">
+                <div>
+                    <h2>Состав шаблона</h2>
+                    <p>@WidgetCountText</p>
+                </div>
+            </div>
+
+            @if (widgets.Count == 0)
+            {
+                <div class="empty-widget-list">Выберите виджеты из списка выше.</div>
+            }
+            else
+            {
+                <div class="selected-widgets">
+                    @foreach (var widget in widgets.OrderBy(item => item.Order))
+                    {
+                        <article class="selected-widget @(draggedWidgetId == widget.Id ? "dragging" : string.Empty)"
+                                 draggable="true"
+                                 @ondragstart="() => StartDrag(widget.Id)"
+                                 @ondragover:preventDefault
+                                 @ondrop="() => DropOn(widget.Id)">
+                            <div class="drag-handle">⋮⋮</div>
+                            <div>
+                                <strong>@widget.DisplayTitle</strong>
+                                <small>@GetWidgetDescription(widget.Type)</small>
+                            </div>
+                            <button type="button" title="Удалить" @onclick="() => RemoveWidget(widget.Id)">×</button>
+                        </article>
+                    }
+                </div>
+            }
+
             <div class="editor-actions">
                 <button type="button" @onclick="SaveAsync">Сохранить</button>
+                <button type="button" class="secondary" @onclick="OpenClientPreview">Предпросмотр</button>
                 <button type="button" class="secondary" @onclick="Back">Назад</button>
             </div>
         </section>
 
-        <section class="editor-preview">
-            <h2>Структура шаблона</h2>
-            <p>Конфигурация, которая сохраняется в API и передаётся клиенту дисплея.</p>
-            <TemplateStructureSummary Template="PreviewTemplate" />
+        <section class="preview-panel">
+            <div class="preview-header">
+                <div>
+                    <h2>Макет 9:16</h2>
+                    <p>Фиксированная сетка клиентского экрана</p>
+                </div>
+            </div>
+
+            <div class="editor-screen-frame @(theme == TemplateThemes.Dark ? "dark" : "light")">
+                <div class="editor-screen-topline">
+                    <span>Ujin Smart display</span>
+                    <strong>@templateName</strong>
+                </div>
+
+                <div class="editor-screen-grid">
+                    @foreach (var widget in widgets.OrderBy(item => item.Order))
+                    {
+                        <div class="preview-widget @GetSlotClass(widget.Type)">
+                            <span>@GetSlotKicker(widget.Type)</span>
+                            <strong>@widget.DisplayTitle</strong>
+                        </div>
+                    }
+                </div>
+            </div>
         </section>
     </div>
 }
@@ -82,75 +126,154 @@ else
 @code {
     [Parameter] public string? TemplateId { get; set; }
 
-    private string templateName = "Новый шаблон";
-    private string layout = TemplateLayouts.Grid;
-    private string theme = TemplateThemes.Light;
-    private List<string> selectedWidgets = new() { WidgetTypes.News, WidgetTypes.Parking };
+    private const int FixedColumns = 9;
+    private const int FixedGap = 12;
+
+    private string templateName = "Информационный экран";
+    private string theme = TemplateThemes.Dark;
+    private string? draggedWidgetId;
+    private List<TemplateWidgetDto> widgets = new();
+
+    private static readonly IReadOnlyList<string> AvailableWidgets = new[]
+    {
+        WidgetTypes.News,
+        WidgetTypes.Parking,
+        WidgetTypes.Storage,
+        WidgetTypes.Weather,
+        WidgetTypes.StaticText
+    };
 
     private string PageTitleText => string.IsNullOrWhiteSpace(TemplateId) ? "Создание шаблона" : "Редактирование шаблона";
 
-    private TemplateDto PreviewTemplate
+    private string WidgetCountText => widgets.Count switch
     {
-        get
-        {
-            var widgets = selectedWidgets
-                .Select((type, index) => TemplateWidgetDto.Create(type, index + 1))
-                .ToList();
-
-            var config = new TemplateConfigDto
-            {
-                Layout = layout,
-                Theme = theme
-            };
-
-            config.SetWidgetItems(widgets);
-
-            return new TemplateDto
-            {
-                Id = TemplateId ?? "new-template",
-                Name = templateName,
-                Config = config
-            };
-        }
-    }
+        0 => "виджеты не выбраны",
+        1 => "1 виджет выбран",
+        _ => $"{widgets.Count} виджетов выбрано"
+    };
 
     protected override async Task OnInitializedAsync()
     {
-        if (!AuthState.IsAuthenticated || string.IsNullOrWhiteSpace(TemplateId))
+        if (string.IsNullOrWhiteSpace(TemplateId))
         {
+            SeedDefaultWidgets();
             return;
         }
 
         var template = await TemplatesService.GetTemplateByIdAsync(TemplateId);
         if (template is null)
         {
+            SeedDefaultWidgets();
             return;
         }
 
         templateName = template.Name;
-        layout = template.Config.Layout;
-        theme = template.Config.Theme;
-        selectedWidgets = template.Config.GetEffectiveWidgets().Select(widget => widget.Type).ToList();
+        theme = string.IsNullOrWhiteSpace(template.Config.Theme) ? TemplateThemes.Dark : template.Config.Theme;
+        widgets = template.Config.GetEffectiveWidgets();
+
+        if (widgets.Count == 0)
+        {
+            SeedDefaultWidgets();
+        }
     }
 
-    private void ToggleWidget(string type, ChangeEventArgs args)
+    private void SeedDefaultWidgets()
     {
-        var isChecked = args.Value is bool value && value;
-
-        if (isChecked && !selectedWidgets.Contains(type))
+        widgets = new List<TemplateWidgetDto>
         {
-            selectedWidgets.Add(type);
+            CreateWidget(WidgetTypes.News, 1),
+            CreateWidget(WidgetTypes.Parking, 2),
+            CreateWidget(WidgetTypes.Storage, 3),
+            CreateWidget(WidgetTypes.Weather, 4),
+            CreateWidget(WidgetTypes.StaticText, 5)
+        };
+    }
+
+    private static TemplateWidgetDto CreateWidget(string type, int order)
+    {
+        var widget = TemplateWidgetDto.Create(type, order, FixedColumns);
+        widget.Size = WidgetSizes.Normal;
+        widget.ApplySizePreset(FixedColumns);
+        widget.Title = WidgetTypes.GetDisplayName(type);
+        return widget;
+    }
+
+    private void AddWidget(string widgetType)
+    {
+        if (widgets.Any(widget => widget.Type == widgetType))
+        {
+            return;
         }
 
-        if (!isChecked)
+        widgets.Add(CreateWidget(widgetType, widgets.Count + 1));
+        NormalizeOrder();
+    }
+
+    private void RemoveWidget(string widgetId)
+    {
+        widgets.RemoveAll(widget => widget.Id == widgetId);
+        NormalizeOrder();
+    }
+
+    private void StartDrag(string widgetId)
+    {
+        draggedWidgetId = widgetId;
+    }
+
+    private void DropOn(string targetWidgetId)
+    {
+        if (string.IsNullOrWhiteSpace(draggedWidgetId) || draggedWidgetId == targetWidgetId)
         {
-            selectedWidgets.Remove(type);
+            draggedWidgetId = null;
+            return;
         }
+
+        var ordered = widgets.OrderBy(widget => widget.Order).ToList();
+        var dragged = ordered.FirstOrDefault(widget => widget.Id == draggedWidgetId);
+        var target = ordered.FirstOrDefault(widget => widget.Id == targetWidgetId);
+
+        if (dragged is null || target is null)
+        {
+            draggedWidgetId = null;
+            return;
+        }
+
+        ordered.Remove(dragged);
+        ordered.Insert(ordered.IndexOf(target), dragged);
+        widgets = ordered;
+        NormalizeOrder();
+        draggedWidgetId = null;
+    }
+
+    private void NormalizeOrder()
+    {
+        widgets = widgets
+            .Select((widget, index) =>
+            {
+                widget.Order = index + 1;
+                return widget;
+            })
+            .ToList();
+    }
+
+    private TemplateConfigDto BuildConfig()
+    {
+        var config = new TemplateConfigDto
+        {
+            Layout = TemplateLayouts.Grid,
+            Theme = theme,
+            Columns = FixedColumns,
+            Gap = FixedGap
+        };
+
+        config.SetWidgetItems(widgets);
+        return config;
     }
 
     private async Task SaveAsync()
     {
-        var config = PreviewTemplate.Config;
+        NormalizeOrder();
+        var config = BuildConfig();
 
         if (string.IsNullOrWhiteSpace(TemplateId))
         {
@@ -172,20 +295,41 @@ else
         Navigation.NavigateTo("/templates");
     }
 
+    private void OpenClientPreview()
+    {
+        var templateId = string.IsNullOrWhiteSpace(TemplateId) ? "uuid-template-123" : TemplateId;
+        Navigation.NavigateTo($"/templates/{templateId}/preview");
+    }
+
     private void Back() => Navigation.NavigateTo("/templates");
 
-    private static string GetWidgetDescription(string type)
+    private static string GetWidgetDescription(string type) => type switch
     {
-        return type switch
-        {
-            WidgetTypes.News => "Новости, объявления и публикации УК.",
-            WidgetTypes.Parking => "Количество свободных машиномест по зонам.",
-            WidgetTypes.Storage => "Доступные кладовые помещения.",
-            WidgetTypes.StaticText => "Правила ЖК, контакты и постоянная информация.",
-            WidgetTypes.Weather => "Погода и температура возле ЖК.",
-            WidgetTypes.Rss => "Внешняя лента района или города.",
-            WidgetTypes.Camera => "Видеопоток общедомовой камеры.",
-            _ => "Информационный блок дисплея."
-        };
-    }
+        WidgetTypes.News => "Лента объявлений и новостей УК",
+        WidgetTypes.Parking => "Количество свободных парковочных мест",
+        WidgetTypes.Storage => "Количество доступных кладовых",
+        WidgetTypes.Weather => "Погода для жителей",
+        WidgetTypes.StaticText => "Постоянная справочная информация",
+        _ => "Информационный блок"
+    };
+
+    private static string GetSlotKicker(string type) => type switch
+    {
+        WidgetTypes.News => "Новости",
+        WidgetTypes.Parking => "Парковка",
+        WidgetTypes.Storage => "Кладовые",
+        WidgetTypes.Weather => "Погода",
+        WidgetTypes.StaticText => "Информация",
+        _ => "Виджет"
+    };
+
+    private static string GetSlotClass(string type) => type switch
+    {
+        WidgetTypes.News => "slot-news",
+        WidgetTypes.Parking => "slot-parking",
+        WidgetTypes.Storage => "slot-storage",
+        WidgetTypes.Weather => "slot-weather",
+        WidgetTypes.StaticText => "slot-info",
+        _ => "slot-info"
+    };
 }

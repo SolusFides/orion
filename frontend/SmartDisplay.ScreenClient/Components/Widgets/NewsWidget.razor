@@ -1,0 +1,71 @@
+@using System.Text.RegularExpressions
+@using SmartDisplay.Shared.Models.Templates
+@using SmartDisplay.Shared.Models.Ujin
+@using SmartDisplay.ScreenClient.Services
+@inject HttpClient Http
+
+<article class="screen-widget news-widget">
+    <header class="widget-header">
+        <span>Новости</span>
+        <strong>@Widget.DisplayTitle</strong>
+    </header>
+
+    <div class="news-feed">
+        @foreach (var item in newsItems.Take(Limit))
+        {
+            <section class="news-item">
+                <time>@FormatDate(item.Date)</time>
+                <h3>@item.Title</h3>
+                <p>@CleanHtml(item.Text)</p>
+            </section>
+        }
+    </div>
+</article>
+
+@code {
+    [Parameter, EditorRequired] public TemplateWidgetDto Widget { get; set; } = new();
+
+    private List<UjinNewsDto> newsItems = new();
+
+    private int ComplexId => Widget.Settings.TryGetValue("complex_id", out var complexValue) && int.TryParse(complexValue, out var complexId)
+        ? complexId
+        : 73;
+
+    private int BuildingId => Widget.Settings.TryGetValue("building_id", out var value) && int.TryParse(value, out var result)
+        ? result
+        : 141;
+
+    private int Limit => Widget.Settings.TryGetValue("limit", out var value) && int.TryParse(value, out var result)
+        ? Math.Clamp(result, 1, 5)
+        : 2;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            var content = await Http.GetStringAsync($"api/ujin/news?complex_id={ComplexId}&building_id={BuildingId}");
+            newsItems = UjinApiParser.ParseNews(content);
+        }
+        catch
+        {
+            newsItems = ScreenFallbackData.CreateNews();
+        }
+    }
+
+    private static string FormatDate(string value)
+    {
+        return DateTime.TryParse(value, out var date)
+            ? date.ToString("dd.MM")
+            : value;
+    }
+
+    private static string CleanHtml(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return string.Empty;
+        }
+
+        return Regex.Replace(value, "<.*?>", string.Empty).Trim();
+    }
+}

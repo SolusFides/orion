@@ -1,14 +1,32 @@
-<div class="stat-card stat-@Variant">
-    <div class="stat-icon">@Icon</div>
-    <div class="stat-content">
-        <div class="stat-label">@Label</div>
-        <div class="stat-value">@Value</div>
-        @if (!string.IsNullOrWhiteSpace(Hint))
-        {
-            <div class="stat-hint">@Hint</div>
-        }
-    </div>
-</div>
+@if (!string.IsNullOrWhiteSpace(Url))
+{
+    <a class="stat-card stat-@Variant stat-card-link" href="@Url" aria-label="@Label">
+        <div class="stat-icon">@Icon</div>
+        <div class="stat-content">
+            <div class="stat-label">@Label</div>
+            <div class="stat-value">@Value</div>
+            @if (!string.IsNullOrWhiteSpace(Hint))
+            {
+                <div class="stat-hint">@Hint</div>
+            }
+        </div>
+        <div class="stat-arrow">→</div>
+    </a>
+}
+else
+{
+    <article class="stat-card stat-@Variant">
+        <div class="stat-icon">@Icon</div>
+        <div class="stat-content">
+            <div class="stat-label">@Label</div>
+            <div class="stat-value">@Value</div>
+            @if (!string.IsNullOrWhiteSpace(Hint))
+            {
+                <div class="stat-hint">@Hint</div>
+            }
+        </div>
+    </article>
+}
 
 @code {
     [Parameter] public string Label { get; set; } = string.Empty;
@@ -16,4 +34,5 @@
     [Parameter] public string Hint { get; set; } = string.Empty;
     [Parameter] public string Icon { get; set; } = "•";
     [Parameter] public string Variant { get; set; } = "blue";
+    [Parameter] public string? Url { get; set; }
 }

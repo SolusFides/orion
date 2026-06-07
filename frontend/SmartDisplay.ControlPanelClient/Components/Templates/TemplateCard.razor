@@ -31,14 +31,24 @@
     <div class="template-actions">
         <button type="button" @onclick="Edit">Редактировать</button>
         <button type="button" class="secondary" @onclick="Preview">Предпросмотр</button>
+        <button type="button" class="danger" @onclick="DeleteAsync">Удалить</button>
     </div>
 </article>
 
 @code {
     [Parameter, EditorRequired] public TemplateDto Template { get; set; } = new();
+    [Parameter] public EventCallback<string> OnDeleteRequested { get; set; }
 
     private List<TemplateWidgetDto> Widgets => Template.Config.GetEffectiveWidgets();
 
     private void Edit() => Navigation.NavigateTo($"/templates/{Template.Id}/edit");
     private void Preview() => Navigation.NavigateTo($"/templates/{Template.Id}/preview");
+
+    private async Task DeleteAsync()
+    {
+        if (OnDeleteRequested.HasDelegate)
+        {
+            await OnDeleteRequested.InvokeAsync(Template.Id);
+        }
+    }
 }

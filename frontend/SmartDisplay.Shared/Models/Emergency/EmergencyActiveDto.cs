@@ -24,4 +24,7 @@ public class EmergencyActiveDto
 
     [JsonPropertyName("created_at")]
     public DateTime CreatedAt { get; set; }
+
+    [JsonPropertyName("resolved_at")]
+    public DateTime? ResolvedAt { get; set; }
 }

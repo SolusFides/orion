@@ -1,0 +1,11 @@
+@using SmartDisplay.Shared.Models.ClientDisplay
+
+<div class="emergency-banner @(IsDoubleHeight ? "double" : string.Empty)">
+    <span>@Emergency.Text</span>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public ClientActiveEmergencyDto Emergency { get; set; } = new();
+
+    private bool IsDoubleHeight => Emergency.Text.Length > 80;
+}

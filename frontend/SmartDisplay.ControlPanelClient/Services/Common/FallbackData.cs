@@ -22,11 +22,38 @@ public static class FallbackData
             },
             new()
             {
+                Id = "lift_01_01",
+                Name = "Лифт 1 подъезда",
+                ComplexId = 73,
+                BuildingId = 141,
+                Entrance = 1,
+                CurrentTemplateId = "uuid-template-123"
+            },
+            new()
+            {
                 Id = "lift_02",
                 Name = "Лифтовой холл 2",
                 ComplexId = 73,
                 BuildingId = 141,
                 Entrance = 2,
+                CurrentTemplateId = null
+            },
+            new()
+            {
+                Id = "entrance_02_info",
+                Name = "Инфопанель 2 подъезда",
+                ComplexId = 73,
+                BuildingId = 141,
+                Entrance = 2,
+                CurrentTemplateId = "uuid-template-evening"
+            },
+            new()
+            {
+                Id = "entrance_03_info",
+                Name = "Инфопанель 3 подъезда",
+                ComplexId = 73,
+                BuildingId = 141,
+                Entrance = 3,
                 CurrentTemplateId = null
             },
             new()
@@ -37,6 +64,24 @@ public static class FallbackData
                 BuildingId = 141,
                 Entrance = 1,
                 CurrentTemplateId = "uuid-template-evening"
+            },
+            new()
+            {
+                Id = "building_142_hall_01",
+                Name = "Холл дома 142",
+                ComplexId = 73,
+                BuildingId = 142,
+                Entrance = 1,
+                CurrentTemplateId = "uuid-template-123"
+            },
+            new()
+            {
+                Id = "building_142_lift_02",
+                Name = "Лифтовой холл дома 142",
+                ComplexId = 73,
+                BuildingId = 142,
+                Entrance = 2,
+                CurrentTemplateId = null
             }
         };
     }

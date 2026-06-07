@@ -1,0 +1,29 @@
+@page "/preview"
+@page "/preview/template/{TemplateId}"
+
+@inject IClientScreenService ClientScreenService
+
+<PageTitle>Предпросмотр шаблона | Умный дисплей ЖК</PageTitle>
+
+@if (screen is null)
+{
+    <main class="screen-page screen-message">
+        <h1>Загрузка предпросмотра</h1>
+        <p>@TemplateId</p>
+    </main>
+}
+else
+{
+    <ScreenShell Screen="screen" IsPreview="true" />
+}
+
+@code {
+    [Parameter] public string TemplateId { get; set; } = "uuid-template-123";
+
+    private ClientScreenResponse? screen;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        screen = await ClientScreenService.GetPreviewAsync(TemplateId);
+    }
+}

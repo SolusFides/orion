@@ -1,6 +1,35 @@
-﻿<Router AppAssembly="@typeof(App).Assembly" NotFoundPage="typeof(Pages.NotFound)">
-    <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
-        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-    </Found>
-</Router>
+@using SmartDisplay.ControlPanelClient.Services.Auth
+@inject AuthState AuthState
+@inject ITokenStorageService TokenStorage
+
+@if (!isReady)
+{
+    <div class="app-bootstrap">Загрузка панели управления...</div>
+}
+else
+{
+    <Router AppAssembly="@typeof(App).Assembly" NotFoundPage="typeof(Pages.NotFound)">
+        <Found Context="routeData">
+            <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+        </Found>
+    </Router>
+}
+
+@code {
+    private bool isReady;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.IsAuthenticated)
+        {
+            var session = await TokenStorage.LoadSessionAsync();
+            if (session is not null)
+            {
+                AuthState.RestoreSession(session);
+            }
+        }
+
+        isReady = true;
+    }
+}
